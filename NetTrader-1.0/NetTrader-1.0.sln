@@ -5,6 +5,16 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoneyVendor", "WebMoneyVendor\WebMoneyVendor.csproj", "{DA0144EC-DDDB-4E36-8643-F725D51C199B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{A6BC8B20-E047-4810-974E-EAADE83AD6C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vendors", "Vendors", "{BC6FF31C-B2B0-4448-AF3F-C8CEC24D30A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Webmoney", "Webmoney", "{B2FA68B3-D14A-46C9-AB78-848A3C1C3974}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebmoneyInterfaces", "WebmoneyInterfaces", "{DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.Cryptography", "WebMoney.Cryptography\WebMoney.Cryptography.csproj", "{638A48FC-CD5B-4ED8-9D68-160D77D17167}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +25,22 @@ Global
 		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B2FA68B3-D14A-46C9-AB78-848A3C1C3974} = {BC6FF31C-B2B0-4448-AF3F-C8CEC24D30A3}
+		{DCC3A414-274F-4D34-9BD7-E6A3FA61D95D} = {B2FA68B3-D14A-46C9-AB78-848A3C1C3974}
+		{638A48FC-CD5B-4ED8-9D68-160D77D17167} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {494E39B1-DF65-4698-99D0-00BA21BBBCF8}
