@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoneyVendor", "WebMoneyVendor\WebMoneyVendor.csproj", "{DA0144EC-DDDB-4E36-8643-F725D51C199B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{A6BC8B20-E047-4810-974E-EAADE83AD6C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interfaces", "Interfaces\Interfaces.csproj", "{A6BC8B20-E047-4810-974E-EAADE83AD6C0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vendors", "Vendors", "{BC6FF31C-B2B0-4448-AF3F-C8CEC24D30A3}"
 EndProject
@@ -13,7 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Webmoney", "Webmoney", "{B2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebmoneyInterfaces", "WebmoneyInterfaces", "{DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.Cryptography", "WebMoney.Cryptography\WebMoney.Cryptography.csproj", "{638A48FC-CD5B-4ED8-9D68-160D77D17167}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebMoneyVendor", "Webmoney\WebMoneyVendor\WebMoneyVendor.csproj", "{3E8199E9-7297-4B15-AF8B-6A1595335EB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.KeyExtractor", "Webmoney\WebmoneyInterfaces\WebMoney.KeyExtractor\WebMoney.KeyExtractor.csproj", "{4A2DA302-715C-44E1-90AC-39EBA9D25A2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.XmlInterfaces", "Webmoney\WebmoneyInterfaces\WebMoney.XmlInterfaces\WebMoney.XmlInterfaces.csproj", "{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.Cryptography", "Webmoney\WebmoneyInterfaces\WebMoney.Cryptography\WebMoney.Cryptography.csproj", "{862A440D-B4C1-4F81-828A-7FAA781FD5C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMoney.Cryptography.Tests", "Webmoney\WebmoneyInterfaces\WebMoney.Cryptography.Tests\WebMoney.Cryptography.Tests.csproj", "{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +27,30 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA0144EC-DDDB-4E36-8643-F725D51C199B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6BC8B20-E047-4810-974E-EAADE83AD6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{638A48FC-CD5B-4ED8-9D68-160D77D17167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E8199E9-7297-4B15-AF8B-6A1595335EB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8199E9-7297-4B15-AF8B-6A1595335EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8199E9-7297-4B15-AF8B-6A1595335EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8199E9-7297-4B15-AF8B-6A1595335EB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A2DA302-715C-44E1-90AC-39EBA9D25A2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A2DA302-715C-44E1-90AC-39EBA9D25A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A2DA302-715C-44E1-90AC-39EBA9D25A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A2DA302-715C-44E1-90AC-39EBA9D25A2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{862A440D-B4C1-4F81-828A-7FAA781FD5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{862A440D-B4C1-4F81-828A-7FAA781FD5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{862A440D-B4C1-4F81-828A-7FAA781FD5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{862A440D-B4C1-4F81-828A-7FAA781FD5C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -40,7 +58,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B2FA68B3-D14A-46C9-AB78-848A3C1C3974} = {BC6FF31C-B2B0-4448-AF3F-C8CEC24D30A3}
 		{DCC3A414-274F-4D34-9BD7-E6A3FA61D95D} = {B2FA68B3-D14A-46C9-AB78-848A3C1C3974}
-		{638A48FC-CD5B-4ED8-9D68-160D77D17167} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
+		{3E8199E9-7297-4B15-AF8B-6A1595335EB8} = {B2FA68B3-D14A-46C9-AB78-848A3C1C3974}
+		{4A2DA302-715C-44E1-90AC-39EBA9D25A2A} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
+		{F810F3AD-9AC5-4A29-A25E-1F49DC5D621D} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
+		{862A440D-B4C1-4F81-828A-7FAA781FD5C7} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
+		{EC9A2B80-AE4D-452D-B067-5AA0B050C2EF} = {DCC3A414-274F-4D34-9BD7-E6A3FA61D95D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {494E39B1-DF65-4698-99D0-00BA21BBBCF8}
