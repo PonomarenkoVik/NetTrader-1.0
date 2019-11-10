@@ -18,7 +18,7 @@ namespace WebMoneyVendor
             throw new NotImplementedException();
         }
 
-        public Task<IResult<List<IInstrument>>> GetAllInstrument()
+        public Task<IResult<List<IInstrument>>> GetAllInstruments()
         {
             throw new NotImplementedException();
         }
