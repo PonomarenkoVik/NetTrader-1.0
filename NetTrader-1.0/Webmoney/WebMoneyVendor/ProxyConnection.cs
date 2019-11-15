@@ -34,6 +34,7 @@ namespace WebMoneyVendor
         const string HOSTS_DIRECTORY_NAME = "ProxyHosts";
         const int MAX_PORT = 65535;
         const int MIN_PORT = 65535;
+        const int maxProxyErrorNumber = 5;
         const string CHECK_ADDRESS = "google.com.ua";
         const string HOSTS_FILE_NAME = "hosts";
         const string SELECTOR = ":";
@@ -42,7 +43,8 @@ namespace WebMoneyVendor
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
         public static ProxyConnection Instance = new ProxyConnection();
         private WebClient _webClient;
-        private int _currentProxy = 0;
+        private int _currentProxyIndex = 0;
+        private int _errorCounter = 0;
         #endregion
 
 
@@ -122,91 +124,71 @@ namespace WebMoneyVendor
 
         public async Task<string> ReadUrlAsync(string url)
         {
-            try
+            if (_webClient.Proxy != null)
             {
-                if (_webClient.Proxy != null)
+                try
                 {
-                    try
-                    {
-                        return await _webClient.DownloadStringTaskAsync(url);
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                }  
-
-                ProxyURL proxy = ProxyURL.Empty;
-                lock (_syncHosts)
-                {
-                    if (_proxyURLs.Count > 0)
-                    {
-                        proxy = _proxyURLs[_currentProxy];
-                    }
-                    else
-                    {
-                        throw new Exception("Proxies is not working");
-                    }
+                    return await _webClient.DownloadStringTaskAsync(url);
                 }
-
-
-                
+                catch (Exception)
+                {
+                    NextProxy();
+                }
             }
-            catch (Exception)
-            {
-                return null;
-            }
+
+            _webClient.Proxy = new WebProxy(_currentProxy.IP, _currentProxy.Port);
+
+            return await ReadUrlAsync(url);      
         }
 
-        private ProxyURL GetNextproxy()
+        private ProxyURL _currentProxy = ProxyURL.Empty;
+        
+        private void NextProxy()
         {
-            _currentProxy++;
-            if (_proxyURLs.Count > _currentProxy)
-                return _proxyURLs[_currentProxy];
-            _currentProxy = -1;
-            return ProxyURL.Empty;
+            if (_currentProxyIndex < _proxyURLs.Count)
+            {
+                lock(_syncHosts)
+                {
+                    _currentProxy = _proxyURLs[_currentProxyIndex++];
+                }
+                return;
+            }
+
+            if (_errorCounter > maxProxyErrorNumber)
+            {
+                throw new Exception("Proxies don't work");
+            }
+            _errorCounter++;
+            _currentProxyIndex = 0;
+            lock (_syncHosts)
+            {
+                _currentProxy = _proxyURLs.Count > 0 ? _proxyURLs[_currentProxyIndex] : ProxyURL.Empty;
+            }           
         }
 
         private static List<string> GetAdresses()
         {
-            if (CheckDirectory())
+            if (FilesHelper.CheckDirectory(HOSTS_DIRECTORY_NAME) && FilesHelper.CheckFile(HOSTS_FILE_PATH))
             {
-                var lines = File.ReadAllLines(HOSTS_FILE_PATH);
-                if (lines.Length == 0)
+                var lines = FilesHelper.ReadAllLines(HOSTS_FILE_PATH);
+                if (lines.Count == 0)
                     return null;
-
-                _proxyURLs.Clear();
+                List<string> urls = new List<string>();
                 foreach (var line in lines)
                 {
-                    if (!_proxyURLs.Contains(line))
-                        _proxyURLs.Add(line);
+                    if (!urls.Contains(line))
+                        urls.Add(line);
                 }
-                return _proxyURLs;
+                return urls;
             }
             return null;
         }
 
-        private static bool CheckDirectory()
-        {  
-            if (!Directory.Exists(HOSTS_DIRECTORY_NAME))
-            {
-                Directory.CreateDirectory(HOSTS_DIRECTORY_NAME);
-            }
-
-            if (!File.Exists(HOSTS_FILE_PATH))
-            {
-                File.WriteAllText(HOSTS_FILE_PATH, string.Empty);
-                return false;
-            }
-           
-            return true;
-        }
+        
 
         public void Dispose()
         {
             _webClient.Dispose();
-        }
-
-        
+        }       
     }
 }
