@@ -8,6 +8,7 @@ namespace Interfaces.Messages
     {
         CreateMarketOrder,
         CreateLimitOrder,
-        CreateMarketLimit
+        CreateMarketLimit,
+        QUOTE3
     }
 }

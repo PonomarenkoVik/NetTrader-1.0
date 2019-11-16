@@ -12,9 +12,9 @@ namespace Interfaces
         List<IInstrument> GetAllInstruments();
         IInstrument GetInstrumentById(string id);
         Task<IResult<T>> SendMessageToVendor<T>(Message mess);
-        Task<IResult<IEnumerable<IOrder>>> GetLevel2Async(IInstrument instrument, int sourceType = -1);
+        List<IOrder> GetLevel2(IInstrument instrument);
         Task<IResult<List<IAsset>>> GetAssetsAsync(IAccount account);
-        Task<IResult<List<IOrder>>> GetOrders(IAccount account);
-        Task<IResult<IOrder>> GetOrderById(string id, IAccount account);
+        Task<IResult<List<IOrder>>> GetOrdersByAccount(IAccount account);
+        Task<IResult<IOrder>> GetOrderById(string id);
     }
 }

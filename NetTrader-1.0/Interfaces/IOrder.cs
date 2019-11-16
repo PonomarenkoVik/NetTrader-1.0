@@ -9,10 +9,12 @@ namespace Interfaces
         string OrderId { get; }
         DateTime ApplicationDate { get; }
         IInstrument Instrument { get; }
-        double Sum1 { get; set; }
-        double Sum2 { get; }
+        double AmountIn { get; }
+        double AmountOut { get; }
         double StraitCrossrate { get; }
-        double ReveseCrossrate { get; }
-        bool IsOwn { get; }
+        double ReverseCrossrate { get; }
+        double AllAmount { get; }
+        double ProcentBankRate { get; }
+        bool IsOwn { get; set; }
     }
 }
