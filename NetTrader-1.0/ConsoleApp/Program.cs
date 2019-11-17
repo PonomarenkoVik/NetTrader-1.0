@@ -13,7 +13,7 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            ProxyConnection proxy = ProxyConnection.Instance;
+            WebConnection proxy = WebConnection.Instance;
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
@@ -21,10 +21,12 @@ namespace ConsoleApp
             Thread.Sleep(1000);
             Thread.Sleep(1000);
 
-            var res = proxy.ReadUrlAsync("https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=1");
+            var res = proxy.ReadUrlAsync("https://wm.exchanger.ru/asp/XMLbestRates.asp");
             var u = res.Result;
 
-            var mess = XmlParser.CreateQuote3MessageByXML(u);
+            var resp = WebParser.GreateBaseRatesByXML(u);
+
+           
 
             Console.ReadKey();
         }

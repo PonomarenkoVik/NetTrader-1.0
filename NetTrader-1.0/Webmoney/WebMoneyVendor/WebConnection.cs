@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor
 {
-    public class ProxyConnection : IDisposable
+    public class WebConnection : IDisposable
     {
         private struct ProxyURL
         {
@@ -44,13 +44,13 @@ namespace WebMoneyVendor
         private static string HOSTS_FILE_PATH => Path.Combine(HOSTS_DIRECTORY_NAME, HOSTS_FILE_NAME);
         private object _syncHosts = new object();
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
-        public static ProxyConnection Instance = new ProxyConnection();
+        public static WebConnection Instance = new WebConnection();
         private WebClient _webClient;
         private int _currentProxyIndex = 0;
         private int _errorCounter = 0;
         #endregion
 
-        private ProxyConnection()
+        private WebConnection()
         {
             _webClient = new WebClient();
             Task.Factory.StartNew(InitializeProxyHostsAsync);
@@ -72,7 +72,26 @@ namespace WebMoneyVendor
             }
         }
 
-        public async Task<string> ReadUrlAsync(string url)
+        public async Task<string> ReadUrlAsync(string url, bool useProxy = false)
+        {
+            return useProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
+        }
+
+        private async Task<string> ReadUrlWithOutPxoxyAsync(string url)
+        {
+            try
+            {
+                _webClient.Proxy = null;
+                return await _webClient.DownloadStringTaskAsync(url);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+        private async Task<string> ReadUrlWithProxyAsync(string url)
         {
             if (_webClient.Proxy != null)
             {
