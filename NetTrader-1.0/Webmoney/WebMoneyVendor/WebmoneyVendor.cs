@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WebMoneyVendor
@@ -15,7 +16,7 @@ namespace WebMoneyVendor
         private static readonly string _tradeUrl = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
         private static readonly string _tradeXMLUrl = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
         private static readonly string _bestRates = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
-        private ILocalCache _cache;
+        private ICache _cache;
         private QuoteProcessor _quoteProcessor;
         private WebConnection _connection = WebConnection.Instance;
         #endregion
@@ -26,22 +27,26 @@ namespace WebMoneyVendor
         {
             _cache = new DataCache();
             _quoteProcessor = new QuoteProcessor(this);
-            _quoteProcessor.OnQuote += OnNewQuote;
+            _quoteProcessor.OnQuote += _cache.AddQuote;
             _connection.UseProxy = useProxy;
             Populate();
         }
 
-        private void OnNewQuote(Quote3Message mess)
-        {
-            _cache.AddQuote(mess);
-        }
-
         private async void Populate()
         {
+            Thread.Sleep(3000);
             var content = await WebConnection.Instance.ReadUrlAsync(_bestRates);
             var bestRates = XmlParser.GreateBestRatesByXML(content);
             var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
+            foreach (var instr in instruments)
+            {
+                _cache.AddInstrument(instr);
+            }
+        }
 
+        public void Subscribe(IInstrument instr)
+        {
+            _quoteProcessor.Subscribe(instr);
         }
 
         public bool CreateAccount(string id, string pass)
@@ -49,7 +54,7 @@ namespace WebMoneyVendor
             throw new NotImplementedException();
         }
 
-        public List<IInstrument> GetAllInstruments() => _cache.Instruments;
+        public Dictionary<string, IInstrument> GetAllInstruments() => _cache.Instruments;
 
 
         public Task<IResult<List<IAsset>>> GetAssetsAsync(IAccount account)
@@ -57,18 +62,27 @@ namespace WebMoneyVendor
             throw new NotImplementedException();
         }
 
-        public IInstrument GetInstrumentById(string id) => _cache.Instruments.Where(i => i.InstrumentId == id).FirstOrDefault();
-
-
-        internal Quote3Message GetLevel2FromServer(IInstrument instrument) => _cache.GetOrders(instrument);
-
-        internal Quote3Message GetLevel2FromServer(IInstrument instrument) => _cache.GetOrders(instrument);
-
-
-        public Task<IResult<IOrder>> GetOrderById(string id)
+        public IInstrument GetInstrumentByName(string name)
         {
-            throw new NotImplementedException();
+            if (_cache.Instruments.TryGetValue(name, out IInstrument instr))
+                return instr;
+
+            return null;
         }
+
+
+        public async Task<Quote3Message> GetLevel2FromServer(IInstrument instrument)
+        {
+            var content = await _connection.ReadUrlAsync($"{_tradeXMLUrl}{instrument.InstrumentId}");
+            var quote = XmlParser.CreateQuote3MessageByXML(content);
+            return quote;
+        }
+
+        public Quote3Message GetLevel2(IInstrument instrument) => _cache.GetLevel2(instrument);
+
+
+        public IOrder GetOrderById(IInstrument instr, string id) => _cache.GetOrderById(instr, id);
+       
 
         public Task<IResult<List<IOrder>>> GetOrdersByAccount(IAccount account)
         {

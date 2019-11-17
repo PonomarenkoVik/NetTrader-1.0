@@ -7,7 +7,7 @@ namespace Interfaces
     public interface IOrder
     {
         string OrderId { get; }
-        DateTime ApplicationDate { get; }
+        DateTime LastUpdateDate { get; }
         IInstrument Instrument { get; }
         double AmountIn { get; }
         double AmountOut { get; }

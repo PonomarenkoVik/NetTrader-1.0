@@ -1,21 +1,22 @@
 ﻿using Interfaces.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Interfaces
 {
-    public interface ILocalCache
+    public interface ICache
     {
-        bool AddInstrument(IInstrument instrument);
+        void AddInstrument(IInstrument instrument);
         bool RemoveInstrument(IInstrument instrument);
-        List<IInstrument> Instruments { get; }
-        bool AddAccount(IInstrument instrument);
-        bool RemoveAccount(IInstrument instrument);
-        List<IInstrument> Accounts { get; }
+        Dictionary<string, IInstrument> Instruments { get; }
+        bool AddAccount(IAccount account);
+        bool RemoveAccount(IAccount account);
+        ConcurrentDictionary<string, IAccount> Accounts { get; }
         void AddQuote(Quote3Message quote);
-        List<IOrder> GetOrders(IInstrument instr, IAccount account = null);
-        IOrder GetOrderById(string id);
-        Dictionary<DateTime, List<IOrder>> GetHistory();
+        Quote3Message GetLevel2(IInstrument instr);
+        IOrder GetOrderById(IInstrument instr, string id);
+        Dictionary<DateTime, Quote3Message> GetHistory(IInstrument instr);
     }
 }

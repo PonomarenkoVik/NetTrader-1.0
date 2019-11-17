@@ -15,7 +15,7 @@ namespace WebMoneyVendor.Cache
 
         public string OrderId => _params.OrderId;
 
-        public DateTime ApplicationDate => _params.ApplicationDate;
+        public DateTime LastUpdateDate => _params.ApplicationDate;
 
         public IInstrument Instrument => _params.Instrument;
 

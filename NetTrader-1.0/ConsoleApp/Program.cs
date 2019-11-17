@@ -14,21 +14,15 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            WebConnection proxy = WebConnection.Instance;
+            WebmoneyVendor proxy = new WebmoneyVendor(true);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
-
-            var res = proxy.ReadUrlAsync("https://wm.exchanger.ru/asp/XMLbestRates.asp");
-            var u = res.Result;
-
-            var resp = WebParser.GreateBaseRatesByXML(u);
-
-            var instrs = WebmoneyInstrument.CreateInstruments(resp, null);
-           
+            var instrs = proxy.GetAllInstruments();
+            proxy.Subscribe(instrs.Values.First());
 
             Console.ReadKey();
         }

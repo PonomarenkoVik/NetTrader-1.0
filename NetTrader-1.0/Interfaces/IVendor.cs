@@ -9,12 +9,14 @@ namespace Interfaces
     public interface IVendor
     {
         bool CreateAccount(string id, string pass);
-        List<IInstrument> GetAllInstruments();
-        IInstrument GetInstrumentById(string id);
+        Dictionary<string, IInstrument> GetAllInstruments();
+        IInstrument GetInstrumentByName(string id);
         Task<IResult<T>> SendMessageToVendor<T>(Message mess);
         Quote3Message GetLevel2(IInstrument instrument);
+        Task<Quote3Message> GetLevel2FromServer(IInstrument instrument);
         Task<IResult<List<IAsset>>> GetAssetsAsync(IAccount account);
         Task<IResult<List<IOrder>>> GetOrdersByAccount(IAccount account);
-        Task<IResult<IOrder>> GetOrderById(string id);
+        IOrder GetOrderById(IInstrument instr, string id);
+        void Subscribe(IInstrument instr);
     }
 }

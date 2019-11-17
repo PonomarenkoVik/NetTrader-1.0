@@ -36,7 +36,7 @@ namespace WebMoneyVendor
         const string HOSTS_DIRECTORY_NAME = "ProxyHosts";
         const int MAX_PORT = 65535;
         const int MIN_PORT = 1023;
-        const int maxProxyErrorNumber = 5;
+        const int maxProxyErrorNumber = 1000;
         const string CHECK_ADDRESS = "https://www.google.com";
         const string HOSTS_FILE_NAME = "hosts.txt";
         const string SELECTOR = ":";
@@ -45,7 +45,6 @@ namespace WebMoneyVendor
         private object _syncHosts = new object();
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
         public static WebConnection Instance = new WebConnection();
-        private WebClient _webClient;
         private int _currentProxyIndex = 0;
         private int _errorCounter = 0;
 
@@ -54,7 +53,6 @@ namespace WebMoneyVendor
 
         private WebConnection()
         {
-            _webClient = new WebClient();
             Task.Factory.StartNew(InitializeProxyHostsAsync);
         }
 
@@ -83,37 +81,41 @@ namespace WebMoneyVendor
         {
             try
             {
-                _webClient.Proxy = null;
-                return await _webClient.DownloadStringTaskAsync(url);
+                using (var client = new WebClient())
+                {
+                    return await client.DownloadStringTaskAsync(url);
+                }               
             }
             catch (Exception)
             {
                 return null;
             }
-
         }
 
         private async Task<string> ReadUrlWithProxyAsync(string url)
         {
-            if (_webClient.Proxy != null)
-            {
-                try
-                {
-                    return await _webClient.DownloadStringTaskAsync(url);
-                }
-                catch (Exception)
-                {
-                    NextProxy();
-                }
-            }
-            _webClient.Proxy = new WebProxy(_currentProxy.IP, _currentProxy.Port);
 
-            return await ReadUrlAsync(url);
+            WebClient cl = null;
+            try
+            {
+                var proxy = new WebProxy(CurrentProxy.IP, CurrentProxy.Port);
+                cl = new WebClient() { Proxy = proxy };
+                return await cl.DownloadStringTaskAsync(url);
+            }
+            catch (Exception)
+            {
+                NextProxy();
+                return await ReadUrlWithProxyAsync(url);
+            }
+            finally
+            {
+                cl?.Dispose();
+            }
         }
 
         public void Dispose()
         {
-            _webClient.Dispose();
+            
         }
         #endregion
 
@@ -173,16 +175,27 @@ namespace WebMoneyVendor
         }
 
 
-        private ProxyURL _currentProxy = ProxyURL.Empty;
+        private ProxyURL CurrentProxy
+        {
+            get
+            {
+                if (_proxyURLs.Count > _currentProxyIndex)
+                {
+                    lock (_syncHosts)
+                    {
+                        return _proxyURLs[_currentProxyIndex];
+                    }
+                    
+                }
+                return ProxyURL.Empty;
+            }
+        }
 
         private void NextProxy()
         {
             if (_currentProxyIndex < _proxyURLs.Count)
             {
-                lock (_syncHosts)
-                {
-                    _currentProxy = _proxyURLs[_currentProxyIndex++];
-                }
+                 _currentProxyIndex++;
                 return;
             }
 
@@ -192,10 +205,6 @@ namespace WebMoneyVendor
             }
             _errorCounter++;
             _currentProxyIndex = 0;
-            lock (_syncHosts)
-            {
-                _currentProxy = _proxyURLs.Count > 0 ? _proxyURLs[_currentProxyIndex] : ProxyURL.Empty;
-            }
         }
 
         private static bool TryParseAddress(string adr, out ProxyURL prUrl)

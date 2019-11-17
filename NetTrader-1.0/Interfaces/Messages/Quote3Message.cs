@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Interfaces.Messages
@@ -11,6 +12,7 @@ namespace Interfaces.Messages
         
         public string Direction { get; }
 
+        public DateTime LastUpdateDate { get; }
         public BankRate BankRate { get; }
 
         public List<IOrder> Orders { get; }
@@ -20,6 +22,18 @@ namespace Interfaces.Messages
             Direction = dir;
             BankRate = bankRate;
             Orders = orders;
+            var dates = orders.Select(o => o.LastUpdateDate).ToList();
+            dates.Sort();
+            LastUpdateDate = dates.Last();
+        }
+
+
+        internal bool IsEqualQuotes(Quote3Message quote)
+        {
+            if (quote == null || Orders.Count != quote.Orders.Count || LastUpdateDate != quote.LastUpdateDate)
+                return false;
+
+            return true;
         }
     }
 }

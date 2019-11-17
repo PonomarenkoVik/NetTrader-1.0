@@ -13,42 +13,41 @@ namespace WebMoneyVendor
     {
         private IVendor _vendor;
         private Timer _timer = new Timer();
-        private BlockingCollection<IInstrument> _subscribedInstruments = new BlockingCollection<IInstrument>();
-
+        private Dictionary<string, IInstrument> _subscribedInstruments = new Dictionary<string, IInstrument>();
         public Action<Quote3Message> OnQuote;
 
-        public QuoteProcessor(IVendor vendor, int interval = 50)
+        public QuoteProcessor(IVendor vendor, int interval = 100)
         {
             _vendor = vendor;
             _timer.Interval = interval;
             _timer.Elapsed += Tick;
-            Task.Factory.StartNew(Start);
+            _timer.Start();
         }
 
         private void Tick(object sender, ElapsedEventArgs e)
         {
-            foreach (var subInstr in _subscribedInstruments)
+            foreach (var subInstr in _subscribedInstruments.Values)
                 Task.Factory.StartNew(() => GetQuote(subInstr));
-
-
         }
 
-        private void GetQuote(IInstrument subInstr)
+        private async void GetQuote(IInstrument subInstr)
         {
             if (OnQuote != null)
             {
-               var quote = _vendor.GetLevel2
+                var quote = await _vendor.GetLevel2FromServer(subInstr);
+                if (quote != null)
+                    OnQuote.Invoke(quote);
             }
         }
 
         public void Subscribe(IInstrument instr)
         {
-            throw new NotImplementedException();
+            _subscribedInstruments.Add(instr.InstrumentName, instr);
         }
 
         public void UnSubscribe(IInstrument instr)
         {
-            throw new NotImplementedException();
+            _subscribedInstruments.Remove(instr.InstrumentName);
         }
 
         public void Dispose()
