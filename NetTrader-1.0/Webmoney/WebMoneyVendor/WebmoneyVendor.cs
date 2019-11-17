@@ -16,13 +16,32 @@ namespace WebMoneyVendor
         private static readonly string _tradeXMLUrl = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
         private static readonly string _bestRates = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
         private ILocalCache _cache;
+        private QuoteProcessor _quoteProcessor;
+        private WebConnection _connection = WebConnection.Instance;
         #endregion
 
 
 
-        public WebmoneyVendor()
+        public WebmoneyVendor(bool useProxy)
         {
             _cache = new DataCache();
+            _quoteProcessor = new QuoteProcessor(this);
+            _quoteProcessor.OnQuote += OnNewQuote;
+            _connection.UseProxy = useProxy;
+            Populate();
+        }
+
+        private void OnNewQuote(Quote3Message mess)
+        {
+            _cache.AddQuote(mess);
+        }
+
+        private async void Populate()
+        {
+            var content = await WebConnection.Instance.ReadUrlAsync(_bestRates);
+            var bestRates = XmlParser.GreateBestRatesByXML(content);
+            var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
+
         }
 
         public bool CreateAccount(string id, string pass)
@@ -41,8 +60,10 @@ namespace WebMoneyVendor
         public IInstrument GetInstrumentById(string id) => _cache.Instruments.Where(i => i.InstrumentId == id).FirstOrDefault();
 
 
-        public List<IOrder> GetLevel2(IInstrument instrument) => _cache.GetOrders(instrument);
-       
+        internal Quote3Message GetLevel2FromServer(IInstrument instrument) => _cache.GetOrders(instrument);
+
+        internal Quote3Message GetLevel2FromServer(IInstrument instrument) => _cache.GetOrders(instrument);
+
 
         public Task<IResult<IOrder>> GetOrderById(string id)
         {

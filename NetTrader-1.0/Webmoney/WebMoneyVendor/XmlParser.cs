@@ -11,6 +11,7 @@ namespace WebMoneyVendor
     public static class XmlParser
     {
         #region Properties
+        //Quote
         const string BANKRATE = "BankRate";
         const string DIRECTION = "direction";
         const string RATETYPE = "ratetype";
@@ -25,6 +26,20 @@ namespace WebMoneyVendor
         const string QUERYDATE = "querydate";
         const int ORDER_ATTRIBUTE_NUMBER = 8;
         const int BANKRATE_ATTRIBUTE_NUMBER = 2;
+        //Quote
+
+        //Best rates
+        const string RESPONSE = "response";
+        const char INSTRUMENT_NAME_SELECTOR = '-';
+        const string BASERATE = "BaseRate";
+        const string DIRECT = "Direct";
+        const string EXCHTYPE = "exchtype";
+        const string PERSENTAGE_IDENT = "Plus0";
+        const string VOLUME_IDENT = "Plus";
+        const int MAX_INDEX_PERCENTRATE = 9;
+        const int ATTRIBUTE_NUMBER = 17;
+        readonly static int[] MAX_INDEX_VOLUME = { 1, 2, 3, 5, 10 };
+        //Best rates
         #endregion
 
         public static IOrder CreateOrderByXml(XmlNode node)
@@ -63,8 +78,6 @@ namespace WebMoneyVendor
             return BankRate.Empty;
         }
 
-
-
         public static List<IOrder> CreateOrdersByXML(XmlNodeList nodeList)
         {
             if (nodeList == null || nodeList.Count == 0)
@@ -76,9 +89,7 @@ namespace WebMoneyVendor
 
             return orders;
         }
-
-      
-
+    
         public static Quote3Message CreateQuote3MessageByXML(string xml)
         {
             XmlDocument doc = new XmlDocument();
@@ -99,5 +110,59 @@ namespace WebMoneyVendor
                 return null;
             }
         }
+
+        public static List<BestRate> GreateBestRatesByXML(string doc)
+        {
+            List<BestRate> bestRates = new List<BestRate>();
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(doc);
+                var resp = xmlDoc.GetElementsByTagName("response")[0];
+                foreach (XmlNode node in resp.ChildNodes)
+                {
+                    var bestRate = GreateBaseRateByXML(node);
+                    if (bestRate != null)
+                        bestRates.Add(bestRate);
+
+                }
+            }
+            catch (Exception) { }
+            return bestRates;
+        }
+
+        #region Private
+
+        private static BestRate GreateBaseRateByXML(XmlNode node)
+        {
+            try
+            {
+                if (node != null && node.Attributes.Count == ATTRIBUTE_NUMBER)
+                {
+                    double bestRate = double.Parse(node.Attributes.GetNamedItem(BASERATE).Value.Replace(".", ","));
+                    string direct = node.Attributes.GetNamedItem(DIRECT).Value;
+                    var splits = direct.Split(INSTRUMENT_NAME_SELECTOR);
+                    string instrName = $"{splits[0].Trim()}{WebmoneyInstrument.INSTRUMENT_NAME_SELECTOR}{splits[1].Trim()}";
+                    string exchtype = node.Attributes.GetNamedItem(EXCHTYPE).Value;
+                    Dictionary<int, double> persentages = new Dictionary<int, double>();
+                    for (int i = 1; i <= MAX_INDEX_PERCENTRATE; i++)
+                    {
+                        persentages.Add(i, double.Parse(node.Attributes.GetNamedItem($"{PERSENTAGE_IDENT}{i}").Value.Replace(".", ",")));
+                    }
+                    Dictionary<int, double> volumes = new Dictionary<int, double>();
+                    foreach (var index in MAX_INDEX_VOLUME)
+                    {
+                        volumes.Add(index, double.Parse(node.Attributes.GetNamedItem($"{VOLUME_IDENT}{index}").Value.Replace(".", ",")));
+                    }
+                    return new BestRate(instrName, exchtype, bestRate, persentages, volumes);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Save(ex);
+            }
+            return null;
+        }
+        #endregion
     }
 }

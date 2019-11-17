@@ -6,7 +6,7 @@ namespace WebMoneyVendor.Cache
 {
     public class BestRate
     {
-        public BestRate(string instrumentName, int exchangeType, double baseRate, Dictionary<int, double> percentages, Dictionary<int, double> volumes)
+        public BestRate(string instrumentName, string exchangeType, double baseRate, Dictionary<int, double> percentages, Dictionary<int, double> volumes)
         {
             InstrumentName = instrumentName;
             BaseRate = baseRate;
@@ -16,7 +16,7 @@ namespace WebMoneyVendor.Cache
         }
 
         public string InstrumentName { get; }
-        public int ExchangeType { get; }
+        public string ExchangeType { get; }
         public string Currency1 => InstrumentName?.Split(WebmoneyInstrument.INSTRUMENT_NAME_SELECTOR)[0];
         public string Currency2 => InstrumentName?.Split(WebmoneyInstrument.INSTRUMENT_NAME_SELECTOR)[1];
         public double BaseRate { get; }

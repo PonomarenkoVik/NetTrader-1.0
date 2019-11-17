@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using WebMoneyVendor;
+using WebMoneyVendor.Cache;
 
 namespace ConsoleApp
 {
@@ -26,6 +27,7 @@ namespace ConsoleApp
 
             var resp = WebParser.GreateBaseRatesByXML(u);
 
+            var instrs = WebmoneyInstrument.CreateInstruments(resp, null);
            
 
             Console.ReadKey();

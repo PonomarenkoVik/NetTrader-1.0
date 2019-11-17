@@ -6,44 +6,56 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor.Cache
 {
-    public class WebmoneyInstrument : IInstrument
+    internal class WebmoneyInstrument : IInstrument
     {
         internal const char INSTRUMENT_NAME_SELECTOR = '/';
 
-        public string InstrumentId => throw new NotImplementedException();
+        public string InstrumentId { get; }
 
-        public double BankRate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public BankRate BankRate { get; private set; }
 
-        public string InstrumentName => throw new NotImplementedException();
+        public string InstrumentName { get; }
 
-        public string Currency1 => throw new NotImplementedException();
+        public string Currency1 { get; }
 
-        public string Currency2 => throw new NotImplementedException();
+        public string Currency2 { get; }
 
-        public IVendor Vendor => throw new NotImplementedException();
+        public IVendor Vendor { get; }
+
+        public string OppositeInstrumentName => $"{Currency2}{INSTRUMENT_NAME_SELECTOR}{Currency1}";
 
         public Task<IResult<IEnumerable<IOrder>>> GetLevel2Async(int sourceType)
         {
             throw new NotImplementedException();
         }
 
-        private WebmoneyInstrument()
+        public WebmoneyInstrument(string instrId, string instrName, string curr1, string curr2, BankRate bRate, IVendor vend )
         {
-
+            InstrumentId = instrId;
+            InstrumentName = instrName;
+            Currency1 = curr1;
+            Currency2 = curr2;
+            BankRate = bRate;
+            Vendor = vend;
         }
 
-        public List<IInstrument> CreateInstruments(List<BestRate> bestRates)
+        public static bool operator ==(WebmoneyInstrument instr1, WebmoneyInstrument instr2)
         {
-            List<string> currencies = new List<string>();
-            foreach (var bRate in bestRates)
+            if (instr1 == null || instr2 == null)
             {
-                if (!currencies.Contains(bRate.Currency1))
-                    currencies.Add(bRate.Currency1);
-                if (!currencies.Contains(bRate.Currency2))
-                    currencies.Add(bRate.Currency2);
-
-                
+                throw new Exception("instrument is null");
             }
+
+            return instr1.InstrumentId == instr2.InstrumentId && instr1.InstrumentName == instr2.InstrumentName;
+        }
+
+        public static bool operator !=(WebmoneyInstrument instr1, WebmoneyInstrument instr2) => !(instr1 == instr2);
+
+        public override int GetHashCode() => (InstrumentId + InstrumentName).GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            return obj is WebmoneyInstrument instr && instr == this; ;
         }
     }
 }

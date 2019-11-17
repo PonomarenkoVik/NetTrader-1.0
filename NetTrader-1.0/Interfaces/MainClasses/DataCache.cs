@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Interfaces.Messages;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace Interfaces.MainClasses
             throw new NotImplementedException();
         }
 
-        public void AddQuote(List<IOrder> quote)
+        public void AddQuote(Quote3Message quote)
         {
             throw new NotImplementedException();
         }

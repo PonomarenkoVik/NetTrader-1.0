@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor
 {
-    public class WebConnection : IDisposable
+    internal class WebConnection : IDisposable
     {
         private struct ProxyURL
         {
@@ -48,6 +48,8 @@ namespace WebMoneyVendor
         private WebClient _webClient;
         private int _currentProxyIndex = 0;
         private int _errorCounter = 0;
+
+        public bool UseProxy { get; set; } = false;
         #endregion
 
         private WebConnection()
@@ -72,9 +74,9 @@ namespace WebMoneyVendor
             }
         }
 
-        public async Task<string> ReadUrlAsync(string url, bool useProxy = false)
+        public async Task<string> ReadUrlAsync(string url)
         {
-            return useProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
+            return UseProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
         }
 
         private async Task<string> ReadUrlWithOutPxoxyAsync(string url)
