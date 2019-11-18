@@ -19,16 +19,24 @@ namespace WebMoneyVendor
         private ICache _cache;
         private QuoteProcessor _quoteProcessor;
         private WebConnection _connection = WebConnection.Instance;
+
+        public string VendorName => "Wm.Exchanger.ru";
+
+        public bool UseProxy
+        {
+            get => _connection.UseProxy;
+            set => _connection.UseProxy = value;
+        }
         #endregion
 
 
 
-        public WebmoneyVendor(bool useProxy)
+        public WebmoneyVendor(ICache cache, ILog logCache)
         {
-            _cache = new DataCache();
+            UseProxy = true;
+            _cache = cache;
             _quoteProcessor = new QuoteProcessor(this);
             _quoteProcessor.OnQuote += _cache.AddQuote;
-            _connection.UseProxy = useProxy;
             Populate();
         }
 

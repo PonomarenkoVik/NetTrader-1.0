@@ -7,8 +7,7 @@ namespace Interfaces
 {
     public interface ITradeLogic
     {
-        bool AddAccount(string vendorName, string id, string pass);
-        bool RemoveAccount(string vendorName, string id);       
-        List<IVendor> GetVendors();
+        Dictionary<string, IVendor> GetVendors();
+        IVendor GetVendorById(string id);
     }
 }

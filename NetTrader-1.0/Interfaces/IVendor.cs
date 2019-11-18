@@ -8,6 +8,7 @@ namespace Interfaces
 {
     public interface IVendor
     {
+        string VendorName { get; }
         bool CreateAccount(string id, string pass);
         Dictionary<string, IInstrument> GetAllInstruments();
         IInstrument GetInstrumentByName(string id);
