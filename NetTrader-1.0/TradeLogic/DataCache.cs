@@ -72,17 +72,22 @@ namespace Interfaces.MainClasses
                 var lastQuote = qs.Values.LastOrDefault();
                 if (quote.IsEqualQuotes(lastQuote))
                     return;
-
+                bool isNew;
                 lock (_quoteSyncObj)
                 {
+                    isNew = false;
                     if (!qs.ContainsKey(quote.LastUpdateDate))
                     {
+                        isNew = true;
                         qs.Add(quote.LastUpdateDate, quote);
                     }
                     if (qs.Count > GetSizeQuoteCache(quote.InstrumentName))
                         qs.Remove(qs.First().Key);
                 }
-                OnNewQuoteEvent?.Invoke(quote);
+
+                if (isNew)
+                    OnNewQuoteEvent?.Invoke(quote);
+
                 return;
             }
 

@@ -33,7 +33,7 @@ namespace ConsoleApp
             {
                 i++;
                 v.Subscribe(inst);
-                if (i == 10)
+                if (i == 30)
                 {
                     break;
                 }
