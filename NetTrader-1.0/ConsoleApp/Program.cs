@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using Interfaces.Messages;
+using TradeLogic;
 using WebMoneyVendor;
 using WebMoneyVendor.Cache;
 
@@ -14,17 +16,36 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            WebmoneyVendor proxy = new WebmoneyVendor(true);
+            TradeCore core = new TradeCore();
+            var v = core.GetVendors().Values.FirstOrDefault();
+         
+            v.OnNewQuoteEvent += OnNewQuote;
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
             Thread.Sleep(1000);
-            var instrs = proxy.GetAllInstruments();
-            proxy.Subscribe(instrs.Values.First());
+
+            var instrs = v.GetAllInstruments().Values;
+            int i = 0;
+            foreach (var inst in instrs)
+            {
+                i++;
+                v.Subscribe(inst);
+                if (i == 10)
+                {
+                    break;
+                }
+            }
+           
 
             Console.ReadKey();
+        }
+
+        private static void OnNewQuote(Quote3Message mess)
+        {
+           
         }
     }
 }

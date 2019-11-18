@@ -7,7 +7,7 @@ using WebMoneyVendor;
 
 namespace TradeLogic
 {
-    internal class TradeCore : ITradeLogic
+    public class TradeCore : ITradeLogic
     {
         #region Properties
         private Dictionary<string, IVendor> _vendors;

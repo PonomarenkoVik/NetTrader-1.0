@@ -1,5 +1,4 @@
 ﻿using Interfaces;
-using Interfaces.MainClasses;
 using Interfaces.Messages;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,8 @@ namespace WebMoneyVendor
         private QuoteProcessor _quoteProcessor;
         private WebConnection _connection = WebConnection.Instance;
 
+        public event Action<Quote3Message> OnNewQuoteEvent;
+
         public string VendorName => "Wm.Exchanger.ru";
 
         public bool UseProxy
@@ -36,10 +37,13 @@ namespace WebMoneyVendor
             UseProxy = true;
             _cache = cache;
             _quoteProcessor = new QuoteProcessor(this);
-            _quoteProcessor.OnQuote += _cache.AddQuote;
+            _quoteProcessor.OnQuoteEvent += _cache.AddQuote;
+            _cache.OnNewQuoteEvent += OnNewQuote;
             Populate();
         }
 
+        private void OnNewQuote(Quote3Message mess) => OnNewQuoteEvent?.Invoke(mess);
+       
         private async void Populate()
         {
             Thread.Sleep(3000);
@@ -52,15 +56,19 @@ namespace WebMoneyVendor
             }
         }
 
-        public void Subscribe(IInstrument instr)
+        public void Subscribe(IInstrument instr) => _quoteProcessor.Subscribe(instr);
+     
+        public void UnSubscribe(IInstrument instr) => _quoteProcessor.UnSubscribe(instr);
+       
+
+        public bool CreateAccount(string login, string id, string pass)
         {
-            _quoteProcessor.Subscribe(instr);
+            var acc = new WebmoneyAccount(login, id, pass, this);
+           return  _cache.AddAccount(acc);
         }
 
-        public bool CreateAccount(string id, string pass)
-        {
-            throw new NotImplementedException();
-        }
+        public bool RemoveAccount(string id) => _cache.RemoveAccount(id);
+       
 
         public Dictionary<string, IInstrument> GetAllInstruments() => _cache.Instruments;
 
@@ -90,7 +98,7 @@ namespace WebMoneyVendor
 
 
         public IOrder GetOrderById(IInstrument instr, string id) => _cache.GetOrderById(instr, id);
-       
+
 
         public Task<IResult<List<IOrder>>> GetOrdersByAccount(IAccount account)
         {

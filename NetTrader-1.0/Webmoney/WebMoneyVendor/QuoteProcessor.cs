@@ -14,7 +14,7 @@ namespace WebMoneyVendor
         private IVendor _vendor;
         private Timer _timer = new Timer();
         private Dictionary<string, IInstrument> _subscribedInstruments = new Dictionary<string, IInstrument>();
-        public Action<Quote3Message> OnQuote;
+        public Action<Quote3Message> OnQuoteEvent;
 
         public QuoteProcessor(IVendor vendor, int interval = 100)
         {
@@ -32,11 +32,11 @@ namespace WebMoneyVendor
 
         private async void GetQuote(IInstrument subInstr)
         {
-            if (OnQuote != null)
+            if (OnQuoteEvent != null)
             {
                 var quote = await _vendor.GetLevel2FromServer(subInstr);
                 if (quote != null)
-                    OnQuote.Invoke(quote);
+                    OnQuoteEvent.Invoke(quote);
             }
         }
 

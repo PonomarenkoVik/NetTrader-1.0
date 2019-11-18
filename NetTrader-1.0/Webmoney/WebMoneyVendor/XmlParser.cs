@@ -159,7 +159,7 @@ namespace WebMoneyVendor
             }
             catch (Exception ex)
             {
-                Logger.Instance.Save(ex);
+                //Logger.Instance.Save(ex);
             }
             return null;
         }

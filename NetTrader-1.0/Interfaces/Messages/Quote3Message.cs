@@ -10,7 +10,7 @@ namespace Interfaces.Messages
 
         public override MessageType Type => MessageType.QUOTE3;
         
-        public string Direction { get; }
+        public string InstrumentName { get; }
 
         public DateTime LastUpdateDate { get; }
         public BankRate BankRate { get; }
@@ -19,7 +19,7 @@ namespace Interfaces.Messages
 
         public Quote3Message(string dir, BankRate bankRate, List<IOrder> orders)
         {
-            Direction = dir;
+            InstrumentName = dir;
             BankRate = bankRate;
             Orders = orders;
             var dates = orders.Select(o => o.LastUpdateDate).ToList();
@@ -27,8 +27,7 @@ namespace Interfaces.Messages
             LastUpdateDate = dates.Last();
         }
 
-
-        internal bool IsEqualQuotes(Quote3Message quote)
+        public bool IsEqualQuotes(Quote3Message quote)
         {
             if (quote == null || Orders.Count != quote.Orders.Count || LastUpdateDate != quote.LastUpdateDate)
                 return false;

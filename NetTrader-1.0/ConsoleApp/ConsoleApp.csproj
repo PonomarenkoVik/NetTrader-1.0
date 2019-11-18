@@ -54,6 +54,10 @@
       <Project>{A6BC8B20-E047-4810-974E-EAADE83AD6C0}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TradeLogic\TradeLogic.csproj">
+      <Project>{e632973d-a4a1-47df-a1ec-ff96d8d46635}</Project>
+      <Name>TradeLogic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Webmoney\WebMoneyVendor\WebMoneyVendor.csproj">
       <Project>{3e8199e9-7297-4b15-af8b-6a1595335eb8}</Project>
       <Name>WebMoneyVendor</Name>
