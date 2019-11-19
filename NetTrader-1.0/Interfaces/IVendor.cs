@@ -20,8 +20,8 @@ namespace Interfaces
         Task<IResult<List<IAsset>>> GetAssetsAsync(IAccount account);
         Task<IResult<List<IOrder>>> GetOrdersByAccount(IAccount account);
         IOrder GetOrderById(IInstrument instr, string id);
-        void Subscribe(IInstrument instr);
-        void UnSubscribe(IInstrument instr);
+        void Subscribe(Subscription subscr);
+        void UnSubscribe(Subscription subscr);
         event Action<Quote3Message> OnNewQuoteEvent;
     }
 }

@@ -12,22 +12,29 @@ namespace WebMoneyVendor
     internal class QuoteProcessor : IDisposable
     {
         private IVendor _vendor;
-        private Timer _timer = new Timer();
-        private Dictionary<string, IInstrument> _subscribedInstruments = new Dictionary<string, IInstrument>();
-        public Action<Quote3Message> OnQuoteEvent;
+        private Timer _timer = new Timer() { Interval = 50 };
 
-        public QuoteProcessor(IVendor vendor, int interval = 100)
+        private object _subscrSync = new object();
+        private List<Subscription> _subscriptions = new List<Subscription>();
+        private Dictionary<IInstrument, SubscriptionType> _subscribedInstruments = new Dictionary<IInstrument, SubscriptionType>();
+        public Action<Quote3Message> OnQuoteEvent;
+        private long counter = 0;
+
+        public QuoteProcessor(IVendor vendor)
         {
             _vendor = vendor;
-            _timer.Interval = interval;
             _timer.Elapsed += Tick;
             _timer.Start();
         }
 
         private void Tick(object sender, ElapsedEventArgs e)
         {
-            foreach (var subInstr in _subscribedInstruments.Values)
-                Task.Factory.StartNew(() => GetQuote(subInstr));
+            counter++;
+            foreach (var subInstr in _subscribedInstruments)
+            {
+                if (counter % (int)subInstr.Value == 0)
+                    Task.Factory.StartNew(() => GetQuote(subInstr.Key));
+            }
         }
 
         private async void GetQuote(IInstrument subInstr)
@@ -40,14 +47,40 @@ namespace WebMoneyVendor
             }
         }
 
-        public void Subscribe(IInstrument instr)
+        public void Subscribe(Subscription subscr)
         {
-            _subscribedInstruments.Add(instr.InstrumentName, instr);
+            lock (_subscrSync)
+            {
+                if (!_subscriptions.Contains(subscr))
+                    _subscriptions.Add(subscr);
+
+                UpdateSubscribers();
+            }          
         }
 
-        public void UnSubscribe(IInstrument instr)
+        private void UpdateSubscribers()
         {
-            _subscribedInstruments.Remove(instr.InstrumentName);
+            _subscribedInstruments.Clear();
+            foreach (var subscr in _subscriptions)
+            {
+                if (_subscribedInstruments.ContainsKey(subscr.Instrument) && (int)_subscribedInstruments[subscr.Instrument] < (int)subscr.SubscriptionType)
+                {
+                    _subscribedInstruments[subscr.Instrument] = subscr.SubscriptionType;
+                }
+                else
+                    _subscribedInstruments.Add(subscr.Instrument, subscr.SubscriptionType);
+            }
+        }
+
+        public void UnSubscribe(Subscription subscr)
+        {
+            lock (_subscrSync)
+            {
+                if (_subscriptions.Contains(subscr))
+                    _subscriptions.Remove(subscr);
+
+                UpdateSubscribers();
+            }
         }
 
         public void Dispose()

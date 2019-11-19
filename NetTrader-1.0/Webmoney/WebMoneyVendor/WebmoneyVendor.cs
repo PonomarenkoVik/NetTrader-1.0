@@ -56,9 +56,9 @@ namespace WebMoneyVendor
             }
         }
 
-        public void Subscribe(IInstrument instr) => _quoteProcessor.Subscribe(instr);
+        public void Subscribe(Subscription subscr) => _quoteProcessor.Subscribe(subscr);
      
-        public void UnSubscribe(IInstrument instr) => _quoteProcessor.UnSubscribe(instr);
+        public void UnSubscribe(Subscription subscr) => _quoteProcessor.UnSubscribe(subscr);
        
 
         public bool CreateAccount(string login, string id, string pass)
