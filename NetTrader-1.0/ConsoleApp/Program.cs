@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using Interfaces;
 using Interfaces.Messages;
 using TradeLogic;
 using WebMoneyVendor;
@@ -32,7 +33,7 @@ namespace ConsoleApp
             foreach (var inst in instrs)
             {
                 i++;
-                v.Subscribe(inst);
+                v.Subscribe(new Subscription( inst, SubscriptionType.TradingSlow));
                 if (i == 30)
                 {
                     break;

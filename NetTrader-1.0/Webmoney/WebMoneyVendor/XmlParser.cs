@@ -13,7 +13,6 @@ namespace WebMoneyVendor
         #region Properties
         //Quote
         const string BANKRATE = "BankRate";
-        const string DIRECTION = "direction";
         const string RATETYPE = "ratetype";
         const string WMEXCHANGERQUERYS = "WMExchnagerQuerys";
         const string ID = "id";
@@ -63,16 +62,20 @@ namespace WebMoneyVendor
             return null;
         }
 
-        public static BankRate CreateBankRateByXml(XmlNode node)
+        public static BankRate CreateBankRateByXml(XmlDocument doc)
         {
-            if (node == null && node.Attributes.Count != BANKRATE_ATTRIBUTE_NUMBER)
-                return BankRate.Empty;
             try
             {
+                var node = doc.GetElementsByTagName(BANKRATE)[0];
+                var exch = doc.GetElementsByTagName(WMEXCHANGERQUERYS)[0];
+                if (node.Attributes.Count != BANKRATE_ATTRIBUTE_NUMBER)
+                    return BankRate.Empty;
+           
                 double bankRate = double.Parse(node.ChildNodes[0].Value);
-                var direction = node.Attributes.GetNamedItem(DIRECTION).Value;
+                var amountIn = exch.Attributes.GetNamedItem(AMOUNTIN).Value;
+                var amountOut = exch.Attributes.GetNamedItem(AMOUNTOUT).Value;
                 var rateType = node.Attributes.GetNamedItem(RATETYPE).Value;
-                return new BankRate(direction, rateType, bankRate);
+                return new BankRate($"{amountIn}/{amountOut}", rateType, bankRate);
             }
             catch (Exception) { }
             return BankRate.Empty;
@@ -96,7 +99,7 @@ namespace WebMoneyVendor
             try
             {
                 doc.LoadXml(xml);
-                var bankRate = CreateBankRateByXml(doc.GetElementsByTagName(BANKRATE)[0]);
+                var bankRate = CreateBankRateByXml(doc);
                 var orders = CreateOrdersByXML(doc.GetElementsByTagName(WMEXCHANGERQUERYS)[0].ChildNodes);
                 if (bankRate == BankRate.Empty || orders.Count == 0)
                     return null;
