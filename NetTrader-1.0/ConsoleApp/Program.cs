@@ -33,8 +33,8 @@ namespace ConsoleApp
             foreach (var inst in instrs)
             {
                 i++;
-                v.Subscribe(new Subscription( inst, SubscriptionType.TradingSlow));
-                if (i == 30)
+                v.Subscribe(new Subscription( inst, SubscriptionType.QuickTrading));
+                if (i == 1)
                 {
                     break;
                 }

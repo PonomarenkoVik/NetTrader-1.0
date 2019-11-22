@@ -12,9 +12,9 @@ namespace WebMoneyVendor
     public class WebmoneyVendor : IVendor
     {
         #region Properties
-        private static readonly string _tradeUrl = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
-        private static readonly string _tradeXMLUrl = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
-        private static readonly string _bestRates = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
+        const string TRADE_URL = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
+        const string TRADE_XML_URL = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
+        const string BEST_RATES = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
         private ICache _cache;
         private QuoteProcessor _quoteProcessor;
         private WebConnection _connection = WebConnection.Instance;
@@ -47,7 +47,7 @@ namespace WebMoneyVendor
         private async void Populate()
         {
             Thread.Sleep(3000);
-            var content = await WebConnection.Instance.ReadUrlAsync(_bestRates);
+            var content = await WebConnection.Instance.ReadUrlAsync(BEST_RATES);
             var bestRates = XmlParser.GreateBestRatesByXML(content);
             var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
             foreach (var instr in instruments)
@@ -87,10 +87,12 @@ namespace WebMoneyVendor
         }
 
 
-        public async Task<Quote3Message> GetLevel2FromServer(IInstrument instrument)
+        public async Task<Quote3Message> GetLevel2FromServer(IInstrument instrument, int source)
         {
-            var content = await _connection.ReadUrlAsync($"{_tradeXMLUrl}{instrument.InstrumentId}");
-            var quote = XmlParser.CreateQuote3MessageByXML(content);
+            string url = ((QuoteSource)source) == QuoteSource.XML ? TRADE_XML_URL : TRADE_URL;
+
+            var content = await _connection.ReadUrlAsync($"{url}{instrument.InstrumentId}");
+            var quote = ((QuoteSource)source) == QuoteSource.XML ? XmlParser.CreateQuote3MessageByXML(content, instrument) : WebParser.CreateQuote3MessageByXML(content, instrument);
             return quote;
         }
 

@@ -14,7 +14,8 @@ namespace WebMoneyVendor
         private IVendor _vendor;
         private Timer _timer = new Timer() { Interval = 50 };
 
-        private object _subscrSync = new object();
+        private object _subscriberSync = new object();
+        private object _subscriptionrSync = new object();
         private List<Subscription> _subscriptions = new List<Subscription>();
         private Dictionary<IInstrument, SubscriptionType> _subscribedInstruments = new Dictionary<IInstrument, SubscriptionType>();
         public Action<Quote3Message> OnQuoteEvent;
@@ -30,18 +31,27 @@ namespace WebMoneyVendor
         private void Tick(object sender, ElapsedEventArgs e)
         {
             counter++;
-            foreach (var subInstr in _subscribedInstruments)
+            Dictionary<IInstrument, SubscriptionType> subscrInstruments = null;
+            lock (_subscriberSync)
+            {
+                subscrInstruments = new Dictionary<IInstrument, SubscriptionType>(_subscribedInstruments);
+            }
+           
+            foreach (var subInstr in subscrInstruments)
             {
                 if (counter % (int)subInstr.Value == 0)
-                    Task.Factory.StartNew(() => GetQuote(subInstr.Key));
+                {
+                    Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.XML));
+                    Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.Web));
+                }
             }
         }
 
-        private async void GetQuote(IInstrument subInstr)
+        private async void GetQuote(IInstrument subInstr, QuoteSource source)
         {
             if (OnQuoteEvent != null)
             {
-                var quote = await _vendor.GetLevel2FromServer(subInstr);
+                var quote = await _vendor.GetLevel2FromServer(subInstr, (int)source);
                 if (quote != null)
                     OnQuoteEvent.Invoke(quote);
             }
@@ -49,36 +59,43 @@ namespace WebMoneyVendor
 
         public void Subscribe(Subscription subscr)
         {
-            lock (_subscrSync)
+            lock (_subscriberSync)
             {
-                if (!_subscriptions.Contains(subscr))
-                    _subscriptions.Add(subscr);
-
+                lock (_subscriptionrSync)
+                {
+                    if (!_subscriptions.Contains(subscr))
+                        _subscriptions.Add(subscr);
+                }
                 UpdateSubscribers();
             }          
         }
 
         private void UpdateSubscribers()
         {
-            _subscribedInstruments.Clear();
-            foreach (var subscr in _subscriptions)
+            lock (_subscriptionrSync)
             {
-                if (_subscribedInstruments.ContainsKey(subscr.Instrument) && (int)_subscribedInstruments[subscr.Instrument] < (int)subscr.SubscriptionType)
+                _subscribedInstruments.Clear();
+                foreach (var subscr in _subscriptions)
                 {
-                    _subscribedInstruments[subscr.Instrument] = subscr.SubscriptionType;
+                    if (_subscribedInstruments.ContainsKey(subscr.Instrument) && (int)_subscribedInstruments[subscr.Instrument] < (int)subscr.SubscriptionType)
+                    {
+                        _subscribedInstruments[subscr.Instrument] = subscr.SubscriptionType;
+                    }
+                    else
+                        _subscribedInstruments.Add(subscr.Instrument, subscr.SubscriptionType);
                 }
-                else
-                    _subscribedInstruments.Add(subscr.Instrument, subscr.SubscriptionType);
-            }
+            }         
         }
 
         public void UnSubscribe(Subscription subscr)
         {
-            lock (_subscrSync)
+            lock (_subscriberSync)
             {
-                if (_subscriptions.Contains(subscr))
-                    _subscriptions.Remove(subscr);
-
+                lock (_subscriptionrSync)
+                {
+                    if (_subscriptions.Contains(subscr))
+                        _subscriptions.Remove(subscr);
+                }
                 UpdateSubscribers();
             }
         }

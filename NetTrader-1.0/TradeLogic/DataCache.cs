@@ -70,7 +70,7 @@ namespace Interfaces.MainClasses
             if (_quotes.TryGetValue(quote.InstrumentName, out Dictionary<DateTime, Quote3Message> qs))
             {
                 var lastQuote = qs.Values.LastOrDefault();
-                if (quote.IsEqualQuotes(lastQuote))
+                if (quote.IsEqualQuotes(lastQuote) || lastQuote.LastUpdateDate > quote.LastUpdateDate)
                     return;
                 bool isNew;
                 lock (_quoteSyncObj)

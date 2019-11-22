@@ -41,9 +41,9 @@ namespace WebMoneyVendor
         //Best rates
         #endregion
 
-        public static IOrder CreateOrderByXml(XmlNode node)
+        public static IOrder CreateOrderByXml(XmlNode node, IInstrument instr)
         {
-            if (node == null && node.Attributes.Count != ORDER_ATTRIBUTE_NUMBER)
+            if (node == null && node.Attributes.Count != ORDER_ATTRIBUTE_NUMBER )
                 return null;
             try
             {
@@ -54,8 +54,9 @@ namespace WebMoneyVendor
                 par.StraitCrossrate = double.Parse(node.Attributes.GetNamedItem(INOUTRATE).Value);
                 par.ReverseCrossrate = double.Parse(node.Attributes.GetNamedItem(OUTINRATE).Value);
                 par.ProcentBankRate = double.Parse(node.Attributes.GetNamedItem(PROCENTBANKRATE).Value);
-                par.AllAmount = double.Parse(node.Attributes.GetNamedItem(ALLAMOUNT).Value);
+                par.AllAmountOut = double.Parse(node.Attributes.GetNamedItem(ALLAMOUNT).Value);
                 par.ApplicationDate = DateTime.Parse(node.Attributes.GetNamedItem(QUERYDATE).Value);
+                par.Instrument = instr;
                 return new Order(par);
             }
             catch (Exception){}
@@ -81,26 +82,26 @@ namespace WebMoneyVendor
             return BankRate.Empty;
         }
 
-        public static List<IOrder> CreateOrdersByXML(XmlNodeList nodeList)
+        public static List<IOrder> CreateOrdersByXML(XmlNodeList nodeList, IInstrument instr)
         {
             if (nodeList == null || nodeList.Count == 0)
                 return new List<IOrder>();
 
             List<IOrder> orders = new List<IOrder>();
             foreach (XmlNode node in nodeList)
-                orders.Add(CreateOrderByXml(node));
+                orders.Add(CreateOrderByXml(node, instr));
 
             return orders;
         }
     
-        public static Quote3Message CreateQuote3MessageByXML(string xml)
+        public static Quote3Message CreateQuote3MessageByXML(string xml, IInstrument instr)
         {
             XmlDocument doc = new XmlDocument();
             try
             {
                 doc.LoadXml(xml);
                 var bankRate = CreateBankRateByXml(doc);
-                var orders = CreateOrdersByXML(doc.GetElementsByTagName(WMEXCHANGERQUERYS)[0].ChildNodes);
+                var orders = CreateOrdersByXML(doc.GetElementsByTagName(WMEXCHANGERQUERYS)[0].ChildNodes, instr);
                 if (bankRate == BankRate.Empty || orders.Count == 0)
                     return null;
 

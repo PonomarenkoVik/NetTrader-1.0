@@ -27,7 +27,7 @@ namespace WebMoneyVendor.Cache
 
         public double ReverseCrossrate => _params.ReverseCrossrate;
 
-        public double AllAmount => _params.AllAmount;
+        public double AllAmount => _params.AllAmountOut;
 
         public double ProcentBankRate => _params.ProcentBankRate;
 
