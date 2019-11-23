@@ -21,6 +21,8 @@ namespace WebMoneyVendor
         public Action<Quote3Message> OnQuoteEvent;
         private long counter = 0;
 
+        public QuoteSource DataType { get; internal set; }
+
         public QuoteProcessor(IVendor vendor)
         {
             _vendor = vendor;
@@ -41,8 +43,11 @@ namespace WebMoneyVendor
             {
                 if (counter % (int)subInstr.Value == 0)
                 {
-                    Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.XML));
-                    Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.Web));
+                    if (DataType == QuoteSource.WebXML || DataType == QuoteSource.XML)
+                        Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.XML));
+
+                    if (DataType == QuoteSource.WebXML || DataType == QuoteSource.Web)
+                        Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.Web));
                 }
             }
         }

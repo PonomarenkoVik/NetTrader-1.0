@@ -7,6 +7,7 @@ namespace WebMoneyVendor
     internal enum QuoteSource
     {
         Web,
-        XML
+        XML,
+        WebXML
     }
 }

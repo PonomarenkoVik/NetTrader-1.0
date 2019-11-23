@@ -28,6 +28,19 @@ namespace WebMoneyVendor
             get => _connection.UseProxy;
             set => _connection.UseProxy = value;
         }
+        public string DataType
+        {
+            get => _quoteProcessor.DataType.ToString();
+            set
+            {
+                if (Enum.TryParse<QuoteSource>(value, out QuoteSource qSource))
+                {
+                    _quoteProcessor.DataType = qSource;
+                }
+                else
+                    throw new Exception("Wrong data type");               
+            }
+        }
         #endregion
 
 
@@ -36,7 +49,7 @@ namespace WebMoneyVendor
         {
             UseProxy = true;
             _cache = cache;
-            _quoteProcessor = new QuoteProcessor(this);
+            _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.WebXML};
             _quoteProcessor.OnQuoteEvent += _cache.AddQuote;
             _cache.OnNewQuoteEvent += OnNewQuote;
             Populate();
@@ -46,14 +59,17 @@ namespace WebMoneyVendor
        
         private async void Populate()
         {
-            Thread.Sleep(3000);
+            List<IInstrument> instruments = await GetInstruments();
+            foreach (var instr in instruments)
+                _cache.AddInstrument(instr);
+        }
+
+        private async Task<List<IInstrument>> GetInstruments()
+        {
             var content = await WebConnection.Instance.ReadUrlAsync(BEST_RATES);
             var bestRates = XmlParser.GreateBestRatesByXML(content);
             var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
-            foreach (var instr in instruments)
-            {
-                _cache.AddInstrument(instr);
-            }
+            return instruments;
         }
 
         public void Subscribe(Subscription subscr) => _quoteProcessor.Subscribe(subscr);
@@ -111,5 +127,7 @@ namespace WebMoneyVendor
         {
             throw new NotImplementedException();
         }
+
+        public List<string> GetDataTypes() => Enum.GetNames(typeof(QuoteSource)).ToList();
     }
 }

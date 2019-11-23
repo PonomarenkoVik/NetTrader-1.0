@@ -21,19 +21,14 @@ namespace ConsoleApp
             var v = core.GetVendors().Values.FirstOrDefault();
          
             v.OnNewQuoteEvent += OnNewQuote;
-            Thread.Sleep(1000);
-            Thread.Sleep(1000);
-            Thread.Sleep(1000);
-            Thread.Sleep(1000);
-            Thread.Sleep(1000);
-            Thread.Sleep(1000);
-
+           
             var instrs = v.GetAllInstruments().Values;
             int i = 0;
+            Console.ReadKey();
             foreach (var inst in instrs)
             {
                 i++;
-                v.Subscribe(new Subscription( inst, SubscriptionType.QuickTrading));
+                v.Subscribe(new Subscription( inst, SubscriptionType.TradingSlow));
                 if (i == 1)
                 {
                     break;

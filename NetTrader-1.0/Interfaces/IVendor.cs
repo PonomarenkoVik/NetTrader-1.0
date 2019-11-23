@@ -11,7 +11,8 @@ namespace Interfaces
         string VendorName { get; }
         bool CreateAccount(string login, string id, string pass);
         bool RemoveAccount(string id);
-
+        string DataType { get; set; }
+        List<string> GetDataTypes();
         Dictionary<string, IInstrument> GetAllInstruments();
         IInstrument GetInstrumentByName(string id);
         Task<IResult<T>> SendMessageToVendor<T>(Message mess);
