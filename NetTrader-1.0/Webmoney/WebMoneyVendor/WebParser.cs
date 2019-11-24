@@ -39,17 +39,20 @@ namespace WebMoneyVendor
 
                 if (order == null)
                     continue;
-                if (order.)
-                {
 
-                }
-                ordersStraight.Add(order);
+                if (order.Instrument.InstrumentName == instr.InstrumentName)
+                    ordersStraight.Add(order);
+
+                if (order.Instrument.InstrumentName == instr.OppositeInstrumentName)
+                    ordersReverse.Add(order);
             }
-            if (ordersStraight.Count == 0 || ordersReverse.Count == 0)
-                return null;
 
-            Quote3Message mess = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight);
-            return mess;
+            if (ordersStraight.Count == 0 || ordersReverse.Count == 0)
+                return new List<Quote3Message>();
+
+            Quote3Message messStr = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight);
+            Quote3Message messRev = new Quote3Message(instr.OppositeInstrumentName, BankRate.Empty, ordersReverse);
+            return new List<Quote3Message>() { messStr, messRev };
         }
 
         private static Order CreateOrderByWebLine(string orderLine, IInstrument instr)
@@ -90,17 +93,27 @@ namespace WebMoneyVendor
             double inAllAmount = double.Parse(inAllAmountString);
             double outAmount = double.Parse(outAllAmountString);
 
+            IInstrument instrForQuote = null;
+            if (instrumentName == instr.InstrumentName)
+                instrForQuote = instr;
+
+            if (instrumentName == instr.OppositeInstrumentName)
+                instrForQuote = instr.Vendor.GetInstrumentByName(instr.OppositeInstrumentName);
+
+            if (instrForQuote == null)
+                return null;
+
             var param = new OrderParams()
             {
                 OrderId = orderId,
-                Instrument = instr,
-                AmountIn = sum1,
-                AmountOut = sum2,
-                StraitCrossrate = straightCrossRate,
-                ReverseCrossrate = reverseCrossRate,
+                Instrument = instrForQuote,
+                AmountIn = instrumentName == instr.InstrumentName ? sum1 : sum2,
+                AmountOut = instrumentName == instr.InstrumentName ? sum2 : sum1,
+                StraitCrossrate = instrumentName == instr.InstrumentName ? straightCrossRate : reverseCrossRate,
+                ReverseCrossrate = instrumentName == instr.InstrumentName ? reverseCrossRate : straightCrossRate,
                 ProcentBankRate = double.NaN,
-                AllAmountOut = outAmount,
-                AllAmountIn = inAllAmount,
+                AllAmountOut = instrumentName == instr.InstrumentName ? outAmount : inAllAmount,
+                AllAmountIn = instrumentName == instr.InstrumentName ? inAllAmount: outAmount,
                 ApplicationDate = applicationDate
            };
 

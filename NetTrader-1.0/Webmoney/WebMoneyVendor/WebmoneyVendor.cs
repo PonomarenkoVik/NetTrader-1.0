@@ -107,8 +107,8 @@ namespace WebMoneyVendor
         public async Task<List<Quote3Message>> GetLevel2FromServer(IInstrument instrument, int source)
         {
             string url = ((QuoteSource)source) == QuoteSource.XML ? TRADE_XML_URL : TRADE_URL;
-            string u = ((QuoteSource)source) == QuoteSource.XML ? url : $"{url}&lang=en-US";
-            var content = await _connection.ReadUrlAsync($"{url}{instrument.InstrumentId}");
+            string u = ((QuoteSource)source) == QuoteSource.XML ? url : $"{url}";
+            var content = await _connection.ReadUrlAsync($"{u}{instrument.InstrumentId}");
             if (((QuoteSource)source) == QuoteSource.XML)
             {
                 var q = XmlParser.CreateQuote3MessageByXML(content, instrument);

@@ -41,8 +41,8 @@ namespace TradeTerminal
         private void Start()
         {
             var instruments = _vendor.GetAllInstruments();
-            var instr1 = instruments["WMZ/WMR"];
-            var instr2 = instruments["WMR/WMZ"];
+            var instr1 = instruments["WMR/WMU"];
+            var instr2 = instruments["WMU/WMR"];
             _vendor.Subscribe(new Subscription(instr1, SubscriptionType.TradingNormal));
             _vendor.Subscribe(new Subscription(instr2, SubscriptionType.TradingNormal));
             _vendor.OnNewQuoteEvent += OnQuote;
@@ -56,14 +56,14 @@ namespace TradeTerminal
                 Dispatcher.Invoke(new Action(
                     delegate 
                     {
-                        if (obj.InstrumentName == "WMZ/WMR")
-                        {
-                            Grid1.ItemsSource = obj.Orders;
-                        }
-
-                        if (obj.InstrumentName == "WMR/WMZ")
+                        if (obj.InstrumentName == "WMU/WMR")
                         {
                             Grid2.ItemsSource = obj.Orders;
+                        }
+
+                        if (obj.InstrumentName == "WMR/WMU")
+                        {
+                            Grid1.ItemsSource = obj.Orders;
                         }
 
                     }));

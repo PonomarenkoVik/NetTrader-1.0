@@ -59,10 +59,8 @@ namespace WebMoneyVendor
         const string HOSTS_DIRECTORY_NAME = "ProxyHosts";
         const int MAX_PORT = 65535;
         const int MIN_PORT = 1023;
-        const string CHECK_ADDRESS = "https://www.google.com";
         const string HOSTS_FILE_NAME = "hosts.txt";
         const string SELECTOR = ":";
-        const int THREAD_MAX_NUMBER = 10;
         private static string HOSTS_FILE_PATH => Path.Combine(HOSTS_DIRECTORY_NAME, HOSTS_FILE_NAME);
         private object _syncHosts = new object();
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
@@ -79,21 +77,7 @@ namespace WebMoneyVendor
         }
 
         #region Public
-        public bool WriteProxies()
-        {
-            if (_proxyURLs.Count == 0)
-                return false;
-            try
-            {
-                File.Delete(HOSTS_FILE_PATH);
-                return FilesHelper.WriteAllLines(HOSTS_FILE_PATH, _proxyURLs.Select(p => $"{p.IP}:{p.Port}").ToList(), _syncHosts);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
+       
         public async Task<string> ReadUrlAsync(string url)
         {
             return UseProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
@@ -121,7 +105,7 @@ namespace WebMoneyVendor
             try
             {
                 var proxy = new WebProxy(_currentProxy.IP, _currentProxy.Port);
-                cl = new WebClient() { Proxy = proxy , Encoding = Encoding.UTF8};
+                cl = new WebClient() { Proxy = proxy  };
                 var res = await cl.DownloadStringTaskAsync(url);
                 return res;
             }
@@ -153,32 +137,16 @@ namespace WebMoneyVendor
                 throw new Exception($"Set proxies \"{HOSTS_FILE_PATH}\"");
             }
 
-            List<Task> tasks = new List<Task>();
             foreach (var adr in addresses)
             {
 
                 if (!string.IsNullOrEmpty(adr) && TryParseAddress(adr, out ProxyURL prUrl))
                 {
-                    Task task = new Task(() => CheckProxy(CHECK_ADDRESS, prUrl, AddProxy));
-                    tasks.Add(task);
+                    _proxyURLs.Add(prUrl);
                 }
             }
-
-            int counter = 0;
-            List<Task> taskList = new List<Task>();
-            foreach (var task in tasks)
-            {
-                taskList.Add(task);
-                task.Start();
-                counter++;
-                if (counter > THREAD_MAX_NUMBER)
-                {
-                    Task.WaitAll(taskList.ToArray());
-                    taskList.Clear();
-                    counter = 0;
-                }
-            }
-            WriteProxies();
+            _currentProxy = _proxyURLs.First();
+            OnProxiesLoaded?.Invoke();
         }
 
         private static List<string> GetAdresses()
@@ -239,48 +207,6 @@ namespace WebMoneyVendor
             return false;
         }
 
-        private string GetContentWithApartClient(string url, ProxyURL prUrl)
-        {
-            using (var webClient = new WebClient())
-            {
-                if (prUrl != ProxyURL.Empty)
-                {
-                    webClient.Proxy = new WebProxy(prUrl.IP, prUrl.Port);
-                }
-                return webClient.DownloadString(url);
-            }
-        }
-
-        private void CheckProxy(string url, ProxyURL prUrl, Action<ProxyURL> callBack)
-        {
-            try
-            {
-                var content = GetContentWithApartClient(url, prUrl);
-                if (!string.IsNullOrEmpty(content))
-                {
-                    callBack(prUrl);
-                }
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        private void AddProxy(ProxyURL prUrl)
-        {
-            if (prUrl != ProxyURL.Empty)
-            {
-                if (_currentProxy == null)
-                    _currentProxy = prUrl;
-
-                lock (_syncHosts)
-                {
-                    _proxyURLs.Add(prUrl);
-                }
-                if (_proxyURLs.Count == 1)
-                    OnProxiesLoaded?.Invoke();
-            }
-        }
         #endregion
     }
 }
