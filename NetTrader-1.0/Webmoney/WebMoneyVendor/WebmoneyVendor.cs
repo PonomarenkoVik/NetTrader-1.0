@@ -17,7 +17,7 @@ namespace WebMoneyVendor
         const string BEST_RATES = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
         private ICache _cache;
         private QuoteProcessor _quoteProcessor;
-        private WebConnection _connection = WebConnection.Instance;
+        private WebConnection _connection;
 
         public event Action<Quote3Message> OnNewQuoteEvent;
         public event Action LoadedEvent;
@@ -43,16 +43,16 @@ namespace WebMoneyVendor
         }
         #endregion
 
-
-
         public WebmoneyVendor(ICache cache, ILog logCache)
         {
+            _connection = new WebConnection();
+            _connection.OnProxiesLoaded += Populate;
+            _connection.Initialize();
             UseProxy = true;
             _cache = cache;
             _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.WebXML};
             _quoteProcessor.OnQuoteEvent += _cache.AddQuote;
             _cache.OnNewQuoteEvent += OnNewQuote;
-            WebConnection.Instance.OnProxiesLoaded += Populate;
         }
 
         private void OnNewQuote(Quote3Message mess) => OnNewQuoteEvent?.Invoke(mess);
@@ -67,7 +67,7 @@ namespace WebMoneyVendor
 
         private async Task<List<IInstrument>> GetInstruments()
         {
-            var content = await WebConnection.Instance.ReadUrlAsync(BEST_RATES);
+            var content = await _connection.ReadUrlAsync(BEST_RATES);
             var bestRates = XmlParser.GreateBestRatesByXML(content);
             var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
             return instruments;
@@ -143,7 +143,8 @@ namespace WebMoneyVendor
 
         public void Dispose()
         {
-            WebConnection.Instance.OnProxiesLoaded -= Populate;
+            _connection.OnProxiesLoaded -= Populate;
+            _connection.Dispose();
         }
     }
 }

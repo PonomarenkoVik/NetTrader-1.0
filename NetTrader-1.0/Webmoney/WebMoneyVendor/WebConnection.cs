@@ -64,20 +64,21 @@ namespace WebMoneyVendor
         private static string HOSTS_FILE_PATH => Path.Combine(HOSTS_DIRECTORY_NAME, HOSTS_FILE_NAME);
         private object _syncHosts = new object();
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
-        public static WebConnection Instance = new WebConnection();
 
         public bool UseProxy { get; set; } = false;
 
         public event Action OnProxiesLoaded;
         #endregion
 
-        private WebConnection()
+        internal WebConnection()
         {
-            Task.Factory.StartNew(InitializeProxyHostsAsync);
+            
         }
 
+        public void Initialize() => Task.Factory.StartNew(InitializeProxyHostsAsync);
+
         #region Public
-       
+
         public async Task<string> ReadUrlAsync(string url)
         {
             return UseProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
