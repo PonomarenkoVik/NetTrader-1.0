@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor
 {
-    public class WebmoneyVendor : IVendor
+    public class WebmoneyVendor : IVendor, IDisposable
     {
         #region Properties
         const string TRADE_URL = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
@@ -20,7 +20,7 @@ namespace WebMoneyVendor
         private WebConnection _connection = WebConnection.Instance;
 
         public event Action<Quote3Message> OnNewQuoteEvent;
-
+        public event Action LoadedEvent;
         public string VendorName => "Wm.Exchanger.ru";
 
         public bool UseProxy
@@ -52,7 +52,7 @@ namespace WebMoneyVendor
             _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.WebXML};
             _quoteProcessor.OnQuoteEvent += _cache.AddQuote;
             _cache.OnNewQuoteEvent += OnNewQuote;
-            Populate();
+            WebConnection.Instance.OnProxiesLoaded += Populate;
         }
 
         private void OnNewQuote(Quote3Message mess) => OnNewQuoteEvent?.Invoke(mess);
@@ -62,6 +62,7 @@ namespace WebMoneyVendor
             List<IInstrument> instruments = await GetInstruments();
             foreach (var instr in instruments)
                 _cache.AddInstrument(instr);
+            LoadedEvent?.Invoke();
         }
 
         private async Task<List<IInstrument>> GetInstruments()
@@ -106,9 +107,12 @@ namespace WebMoneyVendor
         public async Task<Quote3Message> GetLevel2FromServer(IInstrument instrument, int source)
         {
             string url = ((QuoteSource)source) == QuoteSource.XML ? TRADE_XML_URL : TRADE_URL;
-
+            string u = ((QuoteSource)source) == QuoteSource.XML ? url : $"{url}&lang=en-US";
             var content = await _connection.ReadUrlAsync($"{url}{instrument.InstrumentId}");
             var quote = ((QuoteSource)source) == QuoteSource.XML ? XmlParser.CreateQuote3MessageByXML(content, instrument) : WebParser.CreateQuote3MessageByXML(content, instrument);
+            if (quote == null)
+                _connection.AddException();
+            
             return quote;
         }
 
@@ -129,5 +133,10 @@ namespace WebMoneyVendor
         }
 
         public List<string> GetDataTypes() => Enum.GetNames(typeof(QuoteSource)).ToList();
+
+        public void Dispose()
+        {
+            WebConnection.Instance.OnProxiesLoaded -= Populate;
+        }
     }
 }

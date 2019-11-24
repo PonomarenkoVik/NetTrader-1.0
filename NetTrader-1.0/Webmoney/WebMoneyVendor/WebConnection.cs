@@ -11,44 +11,66 @@ namespace WebMoneyVendor
 {
     internal class WebConnection : IDisposable
     {
-        private struct ProxyURL
-        {
+        private class ProxyURL : IComparable
+        { 
             public static ProxyURL Empty => new ProxyURL(string.Empty, -1);
             public ProxyURL(string ip, int port)
             {
                 IP = ip;
                 Port = port;
+                Exception = 0;
             }
+
+            public int Exception { get; set; }
 
             public string IP { get; }
             public int Port { get; }
 
-            public static bool operator ==(ProxyURL prUrl1, ProxyURL prUrl2) => prUrl1.IP == prUrl2.IP && prUrl1.Port == prUrl2.Port;
+            public static bool operator ==(ProxyURL prUrl1, ProxyURL prUrl2)
+            {
+                if (prUrl1 is null && prUrl2 is null)
+                    return true;
+
+                if (prUrl1 is null || prUrl2 is null)
+                    return false;
+
+                return prUrl1.IP == prUrl2.IP && prUrl1.Port == prUrl2.Port;
+            }
             
             public static bool operator !=(ProxyURL prUrl1, ProxyURL prUrl2) => !(prUrl1 == prUrl2);
            
             public override int GetHashCode() => IP.GetHashCode() + Port;
 
             public override bool Equals(object obj) => obj != null && obj is ProxyURL pr && this == pr;
+
+
+            public int CompareTo(object obj)
+            {
+                var t2 = (ProxyURL)obj;
+                if (Exception > t2.Exception)
+                    return 1;
+                if (Exception < t2.Exception)
+                    return -1;
+                return 0;
+            }
         }
 
         #region Properties
         const string HOSTS_DIRECTORY_NAME = "ProxyHosts";
         const int MAX_PORT = 65535;
         const int MIN_PORT = 1023;
-        const int maxProxyErrorNumber = 1000;
         const string CHECK_ADDRESS = "https://www.google.com";
         const string HOSTS_FILE_NAME = "hosts.txt";
         const string SELECTOR = ":";
-        const int THREAD_MAX_NUMBER = 5;
+        const int THREAD_MAX_NUMBER = 10;
         private static string HOSTS_FILE_PATH => Path.Combine(HOSTS_DIRECTORY_NAME, HOSTS_FILE_NAME);
         private object _syncHosts = new object();
         private static List<ProxyURL> _proxyURLs = new List<ProxyURL>();
         public static WebConnection Instance = new WebConnection();
-        private int _currentProxyIndex = 0;
-        private int _errorCounter = 0;
 
         public bool UseProxy { get; set; } = false;
+
+        public event Action OnProxiesLoaded;
         #endregion
 
         private WebConnection()
@@ -98,13 +120,15 @@ namespace WebMoneyVendor
             WebClient cl = null;
             try
             {
-                var proxy = new WebProxy(CurrentProxy.IP, CurrentProxy.Port);
-                cl = new WebClient() { Proxy = proxy };
-                return await cl.DownloadStringTaskAsync(url);
+                var proxy = new WebProxy(_currentProxy.IP, _currentProxy.Port);
+                cl = new WebClient() { Proxy = proxy , Encoding = Encoding.UTF8};
+                var res = await cl.DownloadStringTaskAsync(url);
+                return res;
             }
             catch (Exception)
             {
-                NextProxy();
+                _currentProxy.Exception += 1;
+                UpdateProxy();
                 return await ReadUrlWithProxyAsync(url);
             }
             finally
@@ -154,6 +178,7 @@ namespace WebMoneyVendor
                     counter = 0;
                 }
             }
+            WriteProxies();
         }
 
         private static List<string> GetAdresses()
@@ -174,37 +199,26 @@ namespace WebMoneyVendor
             return urls;
         }
 
+        private ProxyURL _currentProxy;
 
-        private ProxyURL CurrentProxy
+        private void UpdateProxy()
         {
-            get
+            if (_proxyURLs.Count > 0)
             {
-                if (_proxyURLs.Count > _currentProxyIndex)
+                lock (_syncHosts)
                 {
-                    lock (_syncHosts)
-                    {
-                        return _proxyURLs[_currentProxyIndex];
-                    }
-                    
+                    _proxyURLs.Sort();
+                    _currentProxy = _proxyURLs.First();
                 }
-                return ProxyURL.Empty;
             }
         }
 
-        private void NextProxy()
-        {
-            if (_currentProxyIndex < _proxyURLs.Count)
-            {
-                 _currentProxyIndex++;
-                return;
-            }
+      
 
-            if (_errorCounter > maxProxyErrorNumber)
-            {
-                throw new Exception("Proxies don't work");
-            }
-            _errorCounter++;
-            _currentProxyIndex = 0;
+        internal void AddException()
+        {
+            _currentProxy.Exception++;
+            UpdateProxy();
         }
 
         private static bool TryParseAddress(string adr, out ProxyURL prUrl)
@@ -256,10 +270,15 @@ namespace WebMoneyVendor
         {
             if (prUrl != ProxyURL.Empty)
             {
+                if (_currentProxy == null)
+                    _currentProxy = prUrl;
+
                 lock (_syncHosts)
                 {
                     _proxyURLs.Add(prUrl);
                 }
+                if (_proxyURLs.Count == 1)
+                    OnProxiesLoaded?.Invoke();
             }
         }
         #endregion

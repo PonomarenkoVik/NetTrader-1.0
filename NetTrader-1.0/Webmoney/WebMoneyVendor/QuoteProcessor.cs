@@ -43,8 +43,8 @@ namespace WebMoneyVendor
             {
                 if (counter % (int)subInstr.Value == 0)
                 {
-                    if (DataType == QuoteSource.WebXML || DataType == QuoteSource.XML)
-                        Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.XML));
+                    //if (DataType == QuoteSource.WebXML || DataType == QuoteSource.XML)
+                    //    Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.XML));
 
                     if (DataType == QuoteSource.WebXML || DataType == QuoteSource.Web)
                         Task.Factory.StartNew(() => GetQuote(subInstr.Key, QuoteSource.Web));

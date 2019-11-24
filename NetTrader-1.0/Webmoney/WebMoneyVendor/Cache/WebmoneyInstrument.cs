@@ -41,10 +41,11 @@ namespace WebMoneyVendor.Cache
 
         public static bool operator ==(WebmoneyInstrument instr1, WebmoneyInstrument instr2)
         {
-            if (instr1 == null || instr2 == null)
-            {
-                throw new Exception("instrument is null");
-            }
+            if (instr1 is null && instr2 is null)
+                return true;
+
+            if (instr1 is null || instr2 is null)
+                return false;
 
             return instr1.InstrumentId == instr2.InstrumentId && instr1.InstrumentName == instr2.InstrumentName;
         }

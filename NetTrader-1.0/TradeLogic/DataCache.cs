@@ -98,6 +98,7 @@ namespace Interfaces.MainClasses
 
                 var quotDict = new Dictionary<DateTime, Quote3Message>() { { quote.LastUpdateDate, quote } };
                 _quotes.Add(quote.InstrumentName, quotDict);
+                OnNewQuoteEvent?.Invoke(quote);
             }                                          
         }
 

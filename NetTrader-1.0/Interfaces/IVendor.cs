@@ -24,5 +24,6 @@ namespace Interfaces
         void Subscribe(Subscription subscr);
         void UnSubscribe(Subscription subscr);
         event Action<Quote3Message> OnNewQuoteEvent;
+        event Action LoadedEvent;
     }
 }

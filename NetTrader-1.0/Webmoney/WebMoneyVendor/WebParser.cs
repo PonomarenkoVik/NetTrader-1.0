@@ -41,6 +41,8 @@ namespace WebMoneyVendor
 
                 orders.Add(order);
             }
+            if (orders.Count == 0)
+                return null;
 
             Quote3Message mess = new Quote3Message(instr.InstrumentName, BankRate.Empty, orders);
             return mess;
@@ -61,8 +63,8 @@ namespace WebMoneyVendor
                 return null;
             orderId = orderPointlines[0];
 
-            instrumentName = orderPointlines[1];
-            if (instrumentName != instr.OppositeInstrumentName)
+            instrumentName = $"{orderPointlines[3]}/{orderPointlines[4]}";
+            if (instrumentName != instr.InstrumentName)
                 return null;
 
             if (!double.TryParse(orderPointlines[2], out reverseCrossRate))
