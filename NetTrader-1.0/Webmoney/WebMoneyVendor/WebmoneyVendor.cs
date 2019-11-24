@@ -104,13 +104,20 @@ namespace WebMoneyVendor
         }
 
 
-        public async Task<Quote3Message> GetLevel2FromServer(IInstrument instrument, int source)
+        public async Task<List<Quote3Message>> GetLevel2FromServer(IInstrument instrument, int source)
         {
             string url = ((QuoteSource)source) == QuoteSource.XML ? TRADE_XML_URL : TRADE_URL;
             string u = ((QuoteSource)source) == QuoteSource.XML ? url : $"{url}&lang=en-US";
             var content = await _connection.ReadUrlAsync($"{url}{instrument.InstrumentId}");
-            var quote = ((QuoteSource)source) == QuoteSource.XML ? XmlParser.CreateQuote3MessageByXML(content, instrument) : WebParser.CreateQuote3MessageByXML(content, instrument);
-            if (quote == null)
+            if (((QuoteSource)source) == QuoteSource.XML)
+            {
+                var q = XmlParser.CreateQuote3MessageByXML(content, instrument);
+                if (q == null)
+                    _connection.AddException();
+                return new List<Quote3Message>() { q };
+            }
+            var quote =  WebParser.CreateQuote3MessageByWeb(content, instrument);
+            if (quote.Count == 0)
                 _connection.AddException();
             
             return quote;

@@ -22,9 +22,10 @@ namespace WebMoneyVendor
         private static readonly string[] OrderExceptString = new string[] { "<td", "<tr", "</tr", "&", "%", "div", "class" };
         private static readonly int[] OrderIndexes = new int[] { 0, 1, 3, 7 };
 
-        internal static Quote3Message CreateQuote3MessageByXML(string content, IInstrument instr)
+        internal static List<Quote3Message> CreateQuote3MessageByWeb(string content, IInstrument instr)
         {
-            List<IOrder> orders = new List<IOrder>();
+            List<IOrder> ordersStraight = new List<IOrder>();
+            List<IOrder> ordersReverse = new List<IOrder>();
             string[] orderlines = content.Split(OrderSeparator, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in orderlines)
             {
@@ -38,13 +39,16 @@ namespace WebMoneyVendor
 
                 if (order == null)
                     continue;
+                if (order.)
+                {
 
-                orders.Add(order);
+                }
+                ordersStraight.Add(order);
             }
-            if (orders.Count == 0)
+            if (ordersStraight.Count == 0 || ordersReverse.Count == 0)
                 return null;
 
-            Quote3Message mess = new Quote3Message(instr.InstrumentName, BankRate.Empty, orders);
+            Quote3Message mess = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight);
             return mess;
         }
 
@@ -64,8 +68,6 @@ namespace WebMoneyVendor
             orderId = orderPointlines[0];
 
             instrumentName = $"{orderPointlines[3]}/{orderPointlines[4]}";
-            if (instrumentName != instr.InstrumentName)
-                return null;
 
             if (!double.TryParse(orderPointlines[2], out reverseCrossRate))
                 return null;

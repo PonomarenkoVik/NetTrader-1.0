@@ -56,9 +56,9 @@ namespace WebMoneyVendor
         {
             if (OnQuoteEvent != null)
             {
-                var quote = await _vendor.GetLevel2FromServer(subInstr, (int)source);
-                if (quote != null)
-                    OnQuoteEvent.Invoke(quote);
+                var quotes = await _vendor.GetLevel2FromServer(subInstr, (int)source);
+                foreach (var q in quotes)
+                    OnQuoteEvent.Invoke(q);
             }
         }
 
