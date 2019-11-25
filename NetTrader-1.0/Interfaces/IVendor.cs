@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Interfaces
 {
-    public interface IVendor
+    public interface IVendor : IProperties
     {
         string VendorName { get; }
         bool CreateAccount(string login, string id, string pass);

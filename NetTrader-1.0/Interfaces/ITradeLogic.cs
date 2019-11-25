@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Interfaces
 {
-    public interface ITradeLogic
+    public interface ITradeLogic : IProperties
     {
         Dictionary<string, IVendor> GetVendors();
         IVendor GetVendorById(string id);

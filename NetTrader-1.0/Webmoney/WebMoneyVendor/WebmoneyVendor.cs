@@ -15,6 +15,7 @@ namespace WebMoneyVendor
         const string TRADE_URL = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
         const string TRADE_XML_URL = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
         const string BEST_RATES = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
+        const string PROPERTY_INSTRUMENTS = "instruments";
         private ICache _cache;
         private QuoteProcessor _quoteProcessor;
         private WebConnection _connection;
@@ -22,6 +23,39 @@ namespace WebMoneyVendor
         public event Action<Quote3Message> OnNewQuoteEvent;
         public event Action LoadedEvent;
         public string VendorName => "Wm.Exchanger.ru";
+
+        public string PropertyId => "wmvendor";
+
+        public Properties Properties
+        {
+            get
+            {
+                var props = new Dictionary<string, object>();
+                // Instruments
+                if (_cache.Instruments.Count > 0)
+                    props.Add(PROPERTY_INSTRUMENTS, _cache.Instruments);
+                // Instruments
+
+                var properties = new Properties(PropertyId, props);
+                return properties;
+            }
+            set
+            {
+                // Instruments
+                if (value.Id != PropertyId)
+                    return;
+                if (value.InsideProperties.ContainsKey(PROPERTY_INSTRUMENTS))
+                {
+                    var instrs = value.InsideProperties[PROPERTY_INSTRUMENTS] as Dictionary<string, IInstrument>;
+                    if (instrs != null)
+                    {
+                        foreach (var i in instrs)
+                            _cache.AddInstrument(i.Value);
+                    }
+                }
+                // Instruments
+            }
+        }
 
         public bool UseProxy
         {
