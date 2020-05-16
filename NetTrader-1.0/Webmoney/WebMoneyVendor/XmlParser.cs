@@ -2,6 +2,7 @@
 using Interfaces.Messages;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 using WebMoneyVendor.Cache;
@@ -55,7 +56,7 @@ namespace WebMoneyVendor
                 par.ReverseCrossrate = double.Parse(node.Attributes.GetNamedItem(OUTINRATE).Value);
                 par.ProcentBankRate = double.Parse(node.Attributes.GetNamedItem(PROCENTBANKRATE).Value);
                 par.AllAmountOut = double.Parse(node.Attributes.GetNamedItem(ALLAMOUNT).Value);
-                par.ApplicationDate = DateTime.Parse(node.Attributes.GetNamedItem(QUERYDATE).Value);
+                par.ApplicationDate = DateTime.ParseExact(node.Attributes.GetNamedItem(QUERYDATE).Value, "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 par.Instrument = instr;
                 return new Order(par);
             }

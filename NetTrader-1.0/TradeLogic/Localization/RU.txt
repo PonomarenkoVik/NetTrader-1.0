@@ -1,0 +1,9 @@
+Level2Panel.ApplicationDate=Дата
+Level2Panel.ApplicationDate.descr=Дата последнего обновления
+Level2Panel.OrderId=Id ордера
+Level2Panel.OutcomeSumm=Отдам
+Level2Panel.OutcomeSumm.descr=Сумма для продажи
+Level2Panel.IncomeSumm=Получу
+Level2Panel.IncomeSumm.descr=Сумма, которая будет получена после продажи
+Level2Panel.StraightCrossRate=Прямой  курс
+Level2Panel.ReverseCrossRate=Обратный курс

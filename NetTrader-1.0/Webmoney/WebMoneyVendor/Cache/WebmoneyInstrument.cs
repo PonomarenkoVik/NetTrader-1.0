@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor.Cache
 {
+    [Serializable]
     internal class WebmoneyInstrument : IInstrument
     {
         internal const char INSTRUMENT_NAME_SELECTOR = '/';
@@ -20,7 +21,10 @@ namespace WebMoneyVendor.Cache
 
         public string Currency2 { get; }
 
-        public IVendor Vendor { get; }
+        [NonSerialized]
+        IVendor _vendor;
+
+        public IVendor Vendor => _vendor;
 
         public string OppositeInstrumentName => $"{Currency2}{INSTRUMENT_NAME_SELECTOR}{Currency1}";
 
@@ -36,7 +40,7 @@ namespace WebMoneyVendor.Cache
             Currency1 = curr1;
             Currency2 = curr2;
             BankRate = bRate;
-            Vendor = vend;
+            _vendor = vend;
         }
 
         public static bool operator ==(WebmoneyInstrument instr1, WebmoneyInstrument instr2)

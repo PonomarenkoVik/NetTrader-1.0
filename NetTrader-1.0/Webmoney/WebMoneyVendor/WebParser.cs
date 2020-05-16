@@ -47,12 +47,19 @@ namespace WebMoneyVendor
                     ordersReverse.Add(order);
             }
 
+            var quotes = new List<Quote3Message>();
+
             if (ordersStraight.Count == 0 || ordersReverse.Count == 0)
-                return new List<Quote3Message>();
+                return quotes;
 
             Quote3Message messStr = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight);
             Quote3Message messRev = new Quote3Message(instr.OppositeInstrumentName, BankRate.Empty, ordersReverse);
-            return new List<Quote3Message>() { messStr, messRev };
+            if (messStr != null)
+                quotes.Add(messStr);
+            if (messRev != null)
+                quotes.Add(messRev);
+
+            return quotes;
         }
 
         private static Order CreateOrderByWebLine(string orderLine, IInstrument instr)

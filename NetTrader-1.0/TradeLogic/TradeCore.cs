@@ -28,6 +28,7 @@ namespace TradeLogic
                     {
                         vprops.InsideProperties.Add(v.PropertyId, v.Properties);
                     }
+                    properties.InsideProperties.Add(PROPERTY_VENDORS, vprops);
                 }
                 // Vendors
                 return properties;

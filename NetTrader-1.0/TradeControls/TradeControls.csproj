@@ -4,19 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{88E8CA40-DFBE-4BD0-B5C0-CD2EEB7D64DB}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>TradeTerminal</RootNamespace>
-    <AssemblyName>TradeTerminal</AssemblyName>
+    <ProjectGuid>{62065EF0-62FC-45E2-8467-4BF5B7F69BFC}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <RootNamespace>TradeControls</RootNamespace>
+    <AssemblyName>TradeControls</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,9 +22,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -37,7 +35,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -52,32 +49,21 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="PropertyHelper.cs" />
-    <Page Include="MainWindow.xaml">
+    <Page Include="MainTable\MainTable.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="Panels\MarketDepth.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Panels\MarketDepth.xaml.cs">
-      <DependentUpon>MarketDepth.xaml</DependentUpon>
+    <Compile Include="MainTable\DataGridTextColumnAdvanced.cs" />
+    <Compile Include="MainTable\MainTable.xaml.cs">
+      <DependentUpon>MainTable.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MainTable\Row.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -101,22 +87,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
-      <Project>{a6bc8b20-e047-4810-974e-eaade83ad6c0}</Project>
+      <Project>{A6BC8B20-E047-4810-974E-EAADE83AD6C0}</Project>
       <Name>Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TradeControls\TradeControls.csproj">
-      <Project>{62065ef0-62fc-45e2-8467-4bf5b7f69bfc}</Project>
-      <Name>TradeControls</Name>
     </ProjectReference>
     <ProjectReference Include="..\TradeLogic\TradeLogic.csproj">
       <Project>{e632973d-a4a1-47df-a1ec-ff96d8d46635}</Project>
       <Name>TradeLogic</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

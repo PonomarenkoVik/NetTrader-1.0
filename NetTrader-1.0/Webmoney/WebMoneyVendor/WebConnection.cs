@@ -75,7 +75,7 @@ namespace WebMoneyVendor
             
         }
 
-        public void Initialize() => Task.Factory.StartNew(InitializeProxyHostsAsync);
+        public void InitializeAsync() => Task.Factory.StartNew(InitializeProxyHosts);
 
         #region Public
 
@@ -129,7 +129,7 @@ namespace WebMoneyVendor
         #endregion
 
         #region Private
-        private void InitializeProxyHostsAsync()
+        private void InitializeProxyHosts()
         {
 
             var addresses = GetAdresses();
@@ -153,7 +153,7 @@ namespace WebMoneyVendor
         private static List<string> GetAdresses()
         {
             List<string> urls = new List<string>();
-            if (FilesHelper.CheckDirectory(HOSTS_DIRECTORY_NAME) & FilesHelper.CheckFile(HOSTS_FILE_PATH))
+            if (FilesHelper.CheckDirectory(HOSTS_DIRECTORY_NAME) && FilesHelper.CheckFile(HOSTS_FILE_PATH))
             {
                 var lines = FilesHelper.ReadAllLines(HOSTS_FILE_PATH);
                 if (lines.Count == 0)

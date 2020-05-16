@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebMoneyVendor
 {
+    [Serializable]
     public class WebmoneyVendor : IVendor, IDisposable
     {
         #region Properties
@@ -16,8 +17,11 @@ namespace WebMoneyVendor
         const string TRADE_XML_URL = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
         const string BEST_RATES = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
         const string PROPERTY_INSTRUMENTS = "instruments";
+        [NonSerialized]
         private ICache _cache;
+        [NonSerialized]
         private QuoteProcessor _quoteProcessor;
+        [NonSerialized]
         private WebConnection _connection;
 
         public event Action<Quote3Message> OnNewQuoteEvent;
@@ -26,18 +30,19 @@ namespace WebMoneyVendor
 
         public string PropertyId => "wmvendor";
 
+
         public Properties Properties
         {
             get
             {
-                var props = new Dictionary<string, object>();
+                var props = new Properties(PropertyId);
                 // Instruments
                 if (_cache.Instruments.Count > 0)
-                    props.Add(PROPERTY_INSTRUMENTS, _cache.Instruments);
-                // Instruments
 
-                var properties = new Properties(PropertyId, props);
-                return properties;
+                props.InsideProperties.Add(PROPERTY_INSTRUMENTS, new Properties(PROPERTY_INSTRUMENTS, _cache.Instruments));
+                // Instruments
+                
+                return props;
             }
             set
             {
@@ -46,11 +51,15 @@ namespace WebMoneyVendor
                     return;
                 if (value.InsideProperties.ContainsKey(PROPERTY_INSTRUMENTS))
                 {
-                    var instrs = value.InsideProperties[PROPERTY_INSTRUMENTS] as Dictionary<string, IInstrument>;
-                    if (instrs != null)
+                    var instrsProp = value.InsideProperties[PROPERTY_INSTRUMENTS] as Properties;
+                    if (instrsProp != null)
                     {
-                        foreach (var i in instrs)
-                            _cache.AddInstrument(i.Value);
+                        var instuments = instrsProp.Value as Dictionary<string, IInstrument>;
+                        if (instuments != null)
+                        {
+                            foreach (var i in instuments)
+                                _cache.AddInstrument(i.Value);
+                        }                        
                     }
                 }
                 // Instruments
@@ -81,7 +90,7 @@ namespace WebMoneyVendor
         {
             _connection = new WebConnection();
             _connection.OnProxiesLoaded += Populate;
-            _connection.Initialize();
+            _connection.InitializeAsync();
             UseProxy = true;
             _cache = cache;
             _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.WebXML};
@@ -147,14 +156,18 @@ namespace WebMoneyVendor
             {
                 var q = XmlParser.CreateQuote3MessageByXML(content, instrument);
                 if (q == null)
+                {
                     _connection.AddException();
+                    return new List<Quote3Message>();
+                }
+                    
                 return new List<Quote3Message>() { q };
             }
-            var quote =  WebParser.CreateQuote3MessageByWeb(content, instrument);
-            if (quote.Count == 0)
+            var quotes =  WebParser.CreateQuote3MessageByWeb(content, instrument);
+            if (quotes.Count == 0)
                 _connection.AddException();
             
-            return quote;
+            return quotes;
         }
 
         public Quote3Message GetLevel2(IInstrument instrument) => _cache.GetLevel2(instrument);

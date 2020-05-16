@@ -1,0 +1,6 @@
+Level2Panel.ApplicationDate=Date
+Level2Panel.OrderId=Order Id
+Level2Panel.OutcomeSumm=Outcome
+Level2Panel.IncomeSumm=Income
+Level2Panel.StraightCrossRate=Straight crossrate
+Level2Panel.ReverseCrossRate=Reverse crossrate
