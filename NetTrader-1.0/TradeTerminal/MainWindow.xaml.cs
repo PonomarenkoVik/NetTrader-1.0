@@ -86,6 +86,8 @@ namespace TradeTerminal
         private void OnQuote(Quote3Message msg)
         {
             Grid1.TableItems = msg.Orders.Select((o) => (ITableItem<ColumnParams>)(new Level2Item(o))).ToList();
+            var order = msg.Orders.First((i) => i.LastUpdateDate == msg.LastUpdateDate);
+            Grid1.SetRowBackColor(new Level2Item(order), Brushes.LightCoral);
         }
 
         public void Set(List<ITableItem<ColumnParams>> items)

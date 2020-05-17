@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TradeLogic.Cache;
 using TradeLogic.Table;
 
 namespace TradeControls.MainTable
@@ -121,6 +122,39 @@ namespace TradeControls.MainTable
             {
                 ItemsSource = table.AsDataView();
                 SetColumnState();
+            }
+        }
+
+        public void SetRowBackColor(Level2Item level2Item, SolidColorBrush color)
+        {
+            if (!this.Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => SetRowBackColor(level2Item, color));
+                return;
+            }
+
+            foreach (var it in Items)
+            {
+                var item = it as DataRowView;
+                bool found = true;
+                int index = -1;
+                for (int i = 0; i < level2Item.ColumnsCount; i++)
+                {
+                    var par = level2Item.GetParams(i);
+                    if (item.Row[par.HeaderLocalized].ToString() != level2Item.GetStringValue(i))
+                    {
+                        found = false;
+                        break;
+                    }
+                    index = i;
+                }
+
+                //if (found)
+                //{
+                //    var row = (DataGridRow)ItemContainerGenerator.ContainerFromIndex(index);
+                //    if (row != null)
+                //        row.Background = color;
+                //}
             }
         }
 

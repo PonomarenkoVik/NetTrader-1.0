@@ -16,7 +16,7 @@
             <RowDefinition></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
-        <maintable:MainTableView x:Name="Grid1" Grid.Row="1" Grid.Column="0"></maintable:MainTableView>
+        <maintable:MainTableView x:Name="Grid1" Grid.Row="1" Grid.Column="0" AlternatingRowBackground="LightGray"></maintable:MainTableView>
         
 
     </Grid>
