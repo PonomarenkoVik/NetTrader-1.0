@@ -1,6 +1,7 @@
 ﻿using Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,7 @@ namespace TradeControls.MainTable
         public MainTable()
         {
             InitializeComponent();
+            DataContext = this;
         }
 
         public void Populate(ITableItem<ColumnParams> item)
@@ -58,43 +60,71 @@ namespace TradeControls.MainTable
 
         private void InitColumns()
         {
-            _columns = new List<Column>();
+            //_columns = new List<Column>();
+            //for (int i = 0; i < _item.ColumnsCount; i++)
+            //{
+            //    var par = _item.GetParams(i);
+            //    if (!par.Visible)
+            //        continue;
+
+            //    DataGridTextColumnAdvanced gridColumn = new DataGridTextColumnAdvanced(par);
+                             
+            //    //col.SetValue(DataGridTextColumn.ToolTip)
+            //    Columns.Add(gridColumn);
+            //}
+        }
+
+        private void PopulateRows(List<ITableItem<ColumnParams>> items)
+        {
+            //Items.Clear();
+
+            DataTable table = new DataTable();
+            table.Columns.Add(new DataColumn("Number"));
             for (int i = 0; i < _item.ColumnsCount; i++)
             {
                 var par = _item.GetParams(i);
                 if (!par.Visible)
                     continue;
 
-                DataGridTextColumnAdvanced gridColumn = new DataGridTextColumnAdvanced(par);
-                             
-                //col.SetValue(DataGridTextColumn.ToolTip)
-                Columns.Add(gridColumn);
+                DataColumn col = new DataColumn(par.HeaderLocalized);
+                col.ReadOnly = par.IsReadOnly;
+                table.Columns.Add(col);
             }
-        }
 
-        private void PopulateRows(List<ITableItem<ColumnParams>> items)
-        {
-            Items.Clear();
+            int number = 1;
+
             foreach (var item in items)
             {
-                dynamic row = new ExpandoObject();
-                var rowToAdd = (IDictionary<string, object>)row;
+                var row = table.NewRow();
+                row["Number"] = number;
                 for (int i = 0; i < _item.ColumnsCount; i++)
                 {
-                    //row.Item = item;
-                   
-                    foreach (var c in Columns)
-                    {
-                        var col = c as DataGridTextColumnAdvanced;
-                        DataGridCell cell = new DataGridCell();
-                        cell.IsEditing = col.IsReadOnly;
-                        cell.Content = item.GetStringValue(col.ColumnParams.Index);
-                        rowToAdd[col.ColumnParams.HeaderLocalized] = cell.Content.ToString();
+                    var par = _item.GetParams(i);
+                    if (!par.Visible)
+                        continue;
 
-                    }
+                    row[par.HeaderLocalized] = item.GetStringValue(i);
                 }
-                Items.Add(row);
-            }             
+                number++;
+                //dynamic row = new ExpandoObject();
+                //var rowToAdd = (IDictionary<string, object>)row;
+                //for (int i = 0; i < _item.ColumnsCount; i++)
+                //{
+                //    //row.Item = item;
+                   
+                //    foreach (var c in Columns)
+                //    {
+                //        var col = c as DataGridTextColumnAdvanced;
+                //        DataGridCell cell = new DataGridCell();
+                //        cell.IsEditing = col.IsReadOnly;
+                //        cell.Content = item.GetStringValue(col.ColumnParams.Index);
+                //        rowToAdd[col.ColumnParams.HeaderLocalized] = cell.Content.ToString();
+
+                //    }
+                //}
+                //Items.Add(row);
+            }
+            ItemsSource = table.AsDataView();
         }
 
       

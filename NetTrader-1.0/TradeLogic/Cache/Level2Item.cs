@@ -73,11 +73,11 @@ namespace TradeLogic.Cache
                     string res = date.ToString("MM.dd.yyyy H:mm:ss");
                     return res;            
 
-                case COL_OUTCOME_SUMM:
-                    return Helper.FormatValue(_order.AmountOut, _order.Instrument.Currency1);
+                //case COL_OUTCOME_SUMM:
+                //    return Helper.FormatValue(_order.AmountOut, _order.Instrument.Currency1);
 
-                case COL_INCOME_SUMM:
-                    return Helper.FormatValue(_order.AmountIn, _order.Instrument.Currency2);
+                //case COL_INCOME_SUMM:
+                //    return Helper.FormatValue(_order.AmountIn, _order.Instrument.Currency2);
 
                 default:
                     return val != null ? val.ToString() : "N/A";
