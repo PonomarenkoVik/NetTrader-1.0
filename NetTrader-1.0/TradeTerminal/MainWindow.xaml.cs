@@ -25,10 +25,9 @@ namespace TradeTerminal
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IProperties
+    public partial class MainWindow : Window, IProperties, IDisposable
     {
         private ITradeLogic _core;
-        private IVendor _vendor;
         const string CORE_PROPERTIES = "coreProperties";
         public string PropertyId => "mainProperties";
 
@@ -45,10 +44,11 @@ namespace TradeTerminal
             }
             set
             {
-                if (value != null && value.InsideProperties.TryGetValue(CORE_PROPERTIES, out Interfaces.Properties pr) && _core != null)
-                {
-                    _core.Properties = pr;
-                }
+                if (value == null || value.Id != PropertyId)
+                    return;
+
+                if (value.InsideProperties.TryGetValue(CORE_PROPERTIES, out Interfaces.Properties corePr) && _core != null)
+                    _core.Properties = corePr;
             }
         }
 
@@ -62,36 +62,30 @@ namespace TradeTerminal
         {
             _core = new TradeCore();
             Properties = PropertyHelper.ReadProperties();
-            _vendor = _core.GetVendors().FirstOrDefault().Value;
-            _vendor.LoadedEvent += Start;
-            //Grid1.Populate(new Level2Item(null));
+
+            var vendor = _core.GetVendors().FirstOrDefault().Value;
+            vendor.LoadedEvent += Start;
+            Grid1.Items.Clear();
+            Grid1.IsReadOnly = true;
+            if (vendor.CacheIsLoaded)
+                Start();
         }
 
         private void Start()
         {
-            var instruments = _vendor.GetAllInstruments();
-            var instr1 = instruments["WMR/WMU"];
-            var instr2 = instruments["WMU/WMR"];
-            _vendor.Subscribe(new Subscription(instr1, SubscriptionType.QuickTrading));
-            _vendor.Subscribe(new Subscription(instr2, SubscriptionType.QuickTrading));
-            _vendor.OnNewQuoteEvent += OnQuote;
+            var vendor = _core.GetVendors().FirstOrDefault().Value;
+            var instruments = vendor.GetAllInstruments();
+            var instr1 = instruments["WMR/WMZ"];
+            var instr2 = instruments["WMZ/WMR"];
+            vendor.Subscribe(new Subscription(instr1, SubscriptionType.TradingNormal));
+            vendor.Subscribe(new Subscription(instr2, SubscriptionType.TradingNormal));
+            vendor.OnNewQuoteEvent += OnQuote;
            
         }
 
         private void OnQuote(Quote3Message msg)
         {
-            if (!Dispatcher.CheckAccess())
-            {
-                Dispatcher.Invoke(new Action(
-                    delegate 
-                    {
-                        var items = msg.Orders.Select((o) => (ITableItem<ColumnParams>)(new Level2Item(o))).ToList();
-                        Set(items);
-
-                    }));
-            }
-            else
-                Grid1.ItemsSource = msg.Orders;
+            Grid1.TableItems = msg.Orders.Select((o) => (ITableItem<ColumnParams>)(new Level2Item(o))).ToList();
         }
 
         public void Set(List<ITableItem<ColumnParams>> items)
@@ -99,7 +93,7 @@ namespace TradeTerminal
             var it = items.First();
             DataTable table = new DataTable();
             Grid1.ColumnWidth = DataGridLength.SizeToHeader;
-            Grid1.Wi
+            //Grid1.Wi
             table.Columns.Add(new DataColumn("Number"));
             for (int i = 0; i < it.ColumnsCount; i++)
             {
@@ -156,6 +150,14 @@ namespace TradeTerminal
         {
             PropertyHelper.SaveProperties(Properties);
             base.OnClosing(e);
+            Dispose();
+        }
+
+
+
+        public void Dispose()
+        {
+            Grid1?.Dispose();
         }
     }
 }

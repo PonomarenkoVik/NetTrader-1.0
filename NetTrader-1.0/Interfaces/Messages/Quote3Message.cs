@@ -9,7 +9,9 @@ namespace Interfaces.Messages
     {
 
         public override MessageType Type => MessageType.QUOTE3;
-        
+
+
+        public string QuoteSource { get; set; }
         public string InstrumentName { get; }
 
         public DateTime LastUpdateDate { get; }

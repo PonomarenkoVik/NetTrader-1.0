@@ -21,27 +21,26 @@ namespace Interfaces.MainClasses
         public DataCache()
         {
             _quotes = new Dictionary<string, Dictionary<DateTime, Quote3Message>>();
-            Instruments = new Dictionary<string, IInstrument>();
+            _instruments = new ConcurrentDictionary<string, IInstrument>();
             Accounts = new ConcurrentDictionary<string, IAccount>();
         }
 
-        public Dictionary<string, IInstrument> Instruments { get; }
-
+        public Dictionary<string, IInstrument> Instruments => new Dictionary<string, IInstrument>(_instruments);
         public ConcurrentDictionary<string, IAccount> Accounts { get; }
 
         public bool AddAccount(IAccount account)
         {
             if (!Accounts.ContainsKey(account.Id))
             {
-               return Accounts.TryAdd(account.Id, account);
+                return Accounts.TryAdd(account.Id, account);
             }
             return false;
         }
 
         public void AddInstrument(IInstrument instrument)
         {
-            if (!Instruments.ContainsKey(instrument.InstrumentName))
-                Instruments.Add(instrument.InstrumentName, instrument);
+            if (instrument != null)
+                _instruments[instrument.InstrumentName] = instrument;
         }
 
 
@@ -66,7 +65,7 @@ namespace Interfaces.MainClasses
         }
 
         public void AddQuote(Quote3Message quote)
-        {           
+        {
             if (_quotes.TryGetValue(quote.InstrumentName, out Dictionary<DateTime, Quote3Message> qs))
             {
                 var lastQuote = qs.Values.LastOrDefault();
@@ -99,14 +98,14 @@ namespace Interfaces.MainClasses
                 var quotDict = new Dictionary<DateTime, Quote3Message>() { { quote.LastUpdateDate, quote } };
                 _quotes.Add(quote.InstrumentName, quotDict);
                 OnNewQuoteEvent?.Invoke(quote);
-            }                                          
+            }
         }
 
         public Dictionary<DateTime, Quote3Message> GetHistory(IInstrument instr)
         {
             if (_quotes.TryGetValue(instr.InstrumentName, out Dictionary<DateTime, Quote3Message> qs))
                 return new Dictionary<DateTime, Quote3Message>(qs);
-            
+
             return new Dictionary<DateTime, Quote3Message>();
         }
 
@@ -122,12 +121,12 @@ namespace Interfaces.MainClasses
         public IOrder GetOrderById(IInstrument instr, string id)
         {
             var level2 = GetLevel2(instr);
-            return level2.Orders.Where(o => o.OrderId == id).FirstOrDefault();          
+            return level2.Orders.Where(o => o.OrderId == id).FirstOrDefault();
         }
 
         public bool RemoveAccount(string id) => Accounts.TryRemove(id, out IAccount acc);
-      
+
         public bool RemoveInstrument(IInstrument instrument) => _instruments.TryRemove(instrument.InstrumentName, out IInstrument instr);
-      
+
     }
 }

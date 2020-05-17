@@ -35,6 +35,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -53,15 +55,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="MainTable\MainTableAdvanced.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainTable\MainTableView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainTable\Cell.cs" />
+    <Compile Include="MainTable\Column.cs" />
     <Compile Include="MainTable\DataGridTextColumnAdvanced.cs" />
     <Compile Include="MainTable\MainTable.xaml.cs">
       <DependentUpon>MainTable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainTable\MainTableAdvanced.xaml.cs">
+      <DependentUpon>MainTableAdvanced.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainTable\MainTableView.xaml.cs">
+      <DependentUpon>MainTableView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainTable\Row.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

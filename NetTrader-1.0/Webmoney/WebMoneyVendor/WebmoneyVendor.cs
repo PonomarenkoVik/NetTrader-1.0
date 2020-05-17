@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebMoneyVendor.Cache;
 
 namespace WebMoneyVendor
 {
@@ -16,7 +17,6 @@ namespace WebMoneyVendor
         const string TRADE_URL = "https://wm.exchanger.ru/asp/wmlist.asp?exchtype=";
         const string TRADE_XML_URL = "https://wm.exchanger.ru/asp/XMLwmlist.asp?exchtype=";
         const string BEST_RATES = "https://wm.exchanger.ru/asp/XMLbestRates.asp";
-        const string PROPERTY_INSTRUMENTS = "instruments";
         [NonSerialized]
         private ICache _cache;
         [NonSerialized]
@@ -30,6 +30,7 @@ namespace WebMoneyVendor
 
         public string PropertyId => "wmvendor";
 
+        public bool CacheIsLoaded => _instrumentsIsLoaded;
 
         public Properties Properties
         {
@@ -38,8 +39,12 @@ namespace WebMoneyVendor
                 var props = new Properties(PropertyId);
                 // Instruments
                 if (_cache.Instruments.Count > 0)
+                {
+                    var instrProps = new Properties(WebmoneyInstrument.PROPERTY_INSTRUMENTS);
+                    new List<IInstrument>(_cache.Instruments.Values).ForEach((i) => instrProps.InsideProperties.Add(i.InstrumentId, i.Properties));
+                    props.InsideProperties.Add(WebmoneyInstrument.PROPERTY_INSTRUMENTS, instrProps);
+                }
 
-                props.InsideProperties.Add(PROPERTY_INSTRUMENTS, new Properties(PROPERTY_INSTRUMENTS, _cache.Instruments));
                 // Instruments
                 
                 return props;
@@ -49,20 +54,35 @@ namespace WebMoneyVendor
                 // Instruments
                 if (value.Id != PropertyId)
                     return;
-                if (value.InsideProperties.ContainsKey(PROPERTY_INSTRUMENTS))
+
+                if (value.InsideProperties.ContainsKey(WebmoneyInstrument.PROPERTY_INSTRUMENTS))
                 {
-                    var instrsProp = value.InsideProperties[PROPERTY_INSTRUMENTS] as Properties;
-                    if (instrsProp != null)
-                    {
-                        var instuments = instrsProp.Value as Dictionary<string, IInstrument>;
-                        if (instuments != null)
-                        {
-                            foreach (var i in instuments)
-                                _cache.AddInstrument(i.Value);
-                        }                        
-                    }
+                    SetInstrumentsByProperties(value.InsideProperties[WebmoneyInstrument.PROPERTY_INSTRUMENTS]);
+                    if (_cache.Instruments.Count > 0)
+                        _instrumentsIsLoaded = true;
+
                 }
-                // Instruments
+            }
+        }
+
+        private void SetInstrumentsByProperties(Properties instrsProp)
+        {
+            if (instrsProp == null || instrsProp.InsideProperties.Count == 0)
+                return;
+
+
+            foreach (var prop in instrsProp.InsideProperties)
+            {
+                try
+                {
+                    var i = new WebmoneyInstrument(this);
+                    i.Properties = prop.Value;
+                    _cache.AddInstrument(i);
+                }
+                catch (Exception ex)
+                {
+
+                }                
             }
         }
 
@@ -71,6 +91,7 @@ namespace WebMoneyVendor
             get => _connection.UseProxy;
             set => _connection.UseProxy = value;
         }
+
         public string DataType
         {
             get => _quoteProcessor.DataType.ToString();
@@ -89,28 +110,54 @@ namespace WebMoneyVendor
         public WebmoneyVendor(ICache cache, ILog logCache)
         {
             _connection = new WebConnection();
-            _connection.OnProxiesLoaded += Populate;
+            _connection.OnProxiesLoaded += PopulateAsync;
             _connection.InitializeAsync();
             UseProxy = true;
             _cache = cache;
-            _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.WebXML};
+            _quoteProcessor = new QuoteProcessor(this) { DataType = QuoteSource.Web};
             _quoteProcessor.OnQuoteEvent += _cache.AddQuote;
             _cache.OnNewQuoteEvent += OnNewQuote;
         }
 
         private void OnNewQuote(Quote3Message mess) => OnNewQuoteEvent?.Invoke(mess);
-       
-        private async void Populate()
+
+
+        private bool _instrumentsIsLoaded = false;
+        private async void PopulateAsync()
         {
-            List<IInstrument> instruments = await GetInstruments();
-            foreach (var instr in instruments)
-                _cache.AddInstrument(instr);
-            LoadedEvent?.Invoke();
+            var instruments = await GetInstrumentsAsync();
+            lock (_cache)
+            {
+                _cache.Instruments.Clear();
+                foreach (var instr in instruments)
+                    _cache.AddInstrument(instr);
+            }
+
+            if (!_instrumentsIsLoaded)
+                LoadedEvent?.Invoke();
+
+            _instrumentsIsLoaded = true;
+
         }
 
-        private async Task<List<IInstrument>> GetInstruments()
+
+        private async Task<List<IInstrument>> GetInstrumentsAsync()
         {
-            var content = await _connection.ReadUrlAsync(BEST_RATES);
+            string content;
+
+            content = await _connection.ReadUrlAsync(BEST_RATES);
+
+            var bestRates = XmlParser.GreateBestRatesByXML(content);
+            var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
+            return instruments;
+        }
+
+        private List<IInstrument> GetInstruments()
+        {
+            string content;
+
+            content = _connection.ReadUrl(BEST_RATES);
+
             var bestRates = XmlParser.GreateBestRatesByXML(content);
             var instruments = WebmoneyHelper.CreateInstruments(bestRates, this);
             return instruments;
@@ -190,7 +237,7 @@ namespace WebMoneyVendor
 
         public void Dispose()
         {
-            _connection.OnProxiesLoaded -= Populate;
+            _connection.OnProxiesLoaded -= PopulateAsync;
             _connection.Dispose();
         }
     }

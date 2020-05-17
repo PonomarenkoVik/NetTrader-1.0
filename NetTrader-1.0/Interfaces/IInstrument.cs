@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Interfaces
 {
-    public interface IInstrument
+    public interface IInstrument : IProperties
     {
         string InstrumentId { get; }
         BankRate BankRate { get; }

@@ -25,5 +25,6 @@ namespace Interfaces
         void UnSubscribe(Subscription subscr);
         event Action<Quote3Message> OnNewQuoteEvent;
         event Action LoadedEvent;
+        bool CacheIsLoaded { get; }
     }
 }

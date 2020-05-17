@@ -1,12 +1,12 @@
-﻿namespace TradeLogic.Table
+﻿namespace TradeControls.MainTable
 {
     public class Column
     {
-        public int VisibilityIndex { get; set; }
+        public int DisplayIndex { get; set; }
         public int Index { get; private set; }
         public Column(int i)
         {
-            VisibilityIndex = Index = i;
+            DisplayIndex = Index = i;
         }
 
         public string Header { get; set; }

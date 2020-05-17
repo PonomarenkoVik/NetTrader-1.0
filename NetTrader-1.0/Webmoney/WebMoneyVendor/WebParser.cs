@@ -52,8 +52,8 @@ namespace WebMoneyVendor
             if (ordersStraight.Count == 0 || ordersReverse.Count == 0)
                 return quotes;
 
-            Quote3Message messStr = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight);
-            Quote3Message messRev = new Quote3Message(instr.OppositeInstrumentName, BankRate.Empty, ordersReverse);
+            Quote3Message messStr = new Quote3Message(instr.InstrumentName, BankRate.Empty, ordersStraight) { QuoteSource = QuoteSource.Web.ToString() };
+            Quote3Message messRev = new Quote3Message(instr.OppositeInstrumentName, BankRate.Empty, ordersReverse) { QuoteSource = QuoteSource.Web.ToString() };
             if (messStr != null)
                 quotes.Add(messStr);
             if (messRev != null)

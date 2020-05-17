@@ -16,7 +16,7 @@
             <RowDefinition></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="Grid1" Grid.Row="1" Grid.Column="0"></DataGrid>
+        <maintable:MainTableView x:Name="Grid1" Grid.Row="1" Grid.Column="0"></maintable:MainTableView>
         
 
     </Grid>

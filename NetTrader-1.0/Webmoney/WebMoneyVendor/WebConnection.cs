@@ -84,6 +84,48 @@ namespace WebMoneyVendor
             return UseProxy ? await ReadUrlWithProxyAsync(url) : await ReadUrlWithOutPxoxyAsync(url);
         }
 
+        public string ReadUrl(string url)
+        {
+            return UseProxy ? ReadUrlWithProxy(url) : ReadUrlWithOutPxoxy(url);
+        }
+
+        private string ReadUrlWithOutPxoxy(string url)
+        {
+            try
+            {
+                using (var client = new WebClient())
+                {
+                    return client.DownloadString(url);
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private string ReadUrlWithProxy(string url)
+        {
+            WebClient cl = null;
+            try
+            {
+                var proxy = new WebProxy(_currentProxy.IP, _currentProxy.Port);
+                cl = new WebClient() { Proxy = proxy };
+                var res = cl.DownloadString(url);
+                return res;
+            }
+            catch (Exception ex)
+            {
+                _currentProxy.Exception += 1;
+                UpdateProxy();
+                return ReadUrlWithProxy(url);
+            }
+            finally
+            {
+                cl?.Dispose();
+            }
+        }
+
         private async Task<string> ReadUrlWithOutPxoxyAsync(string url)
         {
             try

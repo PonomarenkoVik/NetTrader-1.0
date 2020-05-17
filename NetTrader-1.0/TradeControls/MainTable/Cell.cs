@@ -1,4 +1,4 @@
-﻿namespace TradeLogic.Table
+﻿namespace TradeControls.MainTable
 {
     public class Cell
     {

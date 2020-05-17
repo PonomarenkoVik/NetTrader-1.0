@@ -106,7 +106,7 @@ namespace WebMoneyVendor
                 if (bankRate == BankRate.Empty || orders.Count == 0)
                     return null;
 
-                Quote3Message mess = new Quote3Message(bankRate.Direction, bankRate, orders);
+                Quote3Message mess = new Quote3Message(bankRate.Direction, bankRate, orders) { QuoteSource = QuoteSource.XML.ToString()};
                 return mess;
 
             }

@@ -66,7 +66,7 @@ namespace TradeTerminal
             {
                 return serializer.Deserialize<T>(str);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return default;
             }
